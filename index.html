@@ -3,154 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotlight Hearts - Celebrity Dating Sim & Music VN</title>
+    <title>Spotlight Hearts - Freeform AI Chat & Celebrity Dating RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=JetBrains+Mono:wght@400;600&display=swap');
         * { box-sizing: border-box; user-select: none; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #242838; border-radius: 4px; }
-        .glass-panel { background: rgba(18, 20, 28, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .dialogue-box { background: linear-gradient(to top, rgba(8, 9, 13, 0.98), rgba(18, 20, 28, 0.92)); backdrop-filter: blur(16px); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #07080c; }
+        ::-webkit-scrollbar-thumb { background: #202434; border-radius: 4px; }
+        .glass-panel { background: rgba(16, 18, 26, 0.88); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .dialogue-glass { background: linear-gradient(to top, rgba(7, 8, 12, 0.98), rgba(16, 18, 26, 0.94)); backdrop-filter: blur(20px); border-top: 1px solid rgba(244, 63, 94, 0.3); }
+        .portrait-frame { filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7)); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-bar-fill { transition: width 0.4s ease-out; }
+        .chat-bubble-user { background: linear-gradient(135deg, #be123c, #e11d48); border-radius: 18px 18px 4px 18px; }
+        .chat-bubble-ai { background: rgba(24, 27, 40, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px 18px 18px 4px; }
     </style>
 </head>
-<body class="bg-[#08090d] text-slate-100 font-sans h-screen flex flex-col overflow-hidden select-none">
+<body class="bg-[#07080c] text-slate-100 font-sans h-screen flex flex-col overflow-hidden select-none">
 
-    <!-- HEADER -->
-    <header class="h-16 border-b border-[#242838] bg-[#12141c]/95 px-5 flex items-center justify-between shrink-0 z-30 shadow-xl">
+    <!-- TOP NAVBAR & RPG STATUS -->
+    <header class="h-16 border-b border-[#202434] bg-[#10121a]/95 px-4 lg:px-6 flex items-center justify-between shrink-0 z-30 shadow-2xl">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 flex items-center justify-center shadow-lg font-black text-black text-xl">🎸</div>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-500 to-amber-400 flex items-center justify-center shadow-lg text-xl font-bold text-black">
+                🎸
+            </div>
             <div>
                 <div class="flex items-center space-x-2">
-                    <span class="font-serif font-black tracking-wide bg-gradient-to-r from-amber-200 via-pink-200 to-white bg-clip-text text-transparent text-xl">SPOTLIGHT HEARTS</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-pink-950/80 border border-pink-500/40 text-pink-300 font-mono">CELEBRITY VN</span>
+                    <span class="font-serif font-black tracking-wide bg-gradient-to-r from-amber-200 via-rose-200 to-white bg-clip-text text-transparent text-lg lg:text-xl">SPOTLIGHT HEARTS</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 font-mono font-bold">FREEFORM AI CHAT</span>
                 </div>
-                <div class="text-[11px] text-slate-400 font-mono">Singer-Songwriter Romance & Stardom</div>
+                <div class="text-[11px] text-slate-400 font-mono flex items-center space-x-2">
+                    <span id="playerDayTime">Day 1 • Evening</span>
+                    <span>•</span>
+                    <span id="playerFunds" class="text-emerald-400 font-bold">$45,000</span>
+                </div>
             </div>
         </div>
 
-        <div class="hidden md:flex items-center space-x-4 bg-[#08090d] px-4 py-2 rounded-2xl border border-[#242838]">
-            <div class="text-xs"><span class="text-slate-400 font-mono">SINGLE:</span> <span id="navSongTitle" class="font-bold text-amber-300">"Sunset Polaroid"</span></div>
-            <div class="h-4 w-px bg-slate-800"></div>
-            <div class="text-xs"><span class="text-slate-400 font-mono">BILLBOARD:</span> <span id="navChartRank" class="font-bold text-emerald-400 font-mono">#4 on Hot 100</span></div>
+        <div class="hidden lg:flex items-center space-x-5 bg-[#07080c] px-4 py-1.5 rounded-2xl border border-[#202434]">
+            <div class="flex flex-col w-24">
+                <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-0.5">
+                    <span>ENERGY</span>
+                    <span id="statEnergyVal" class="text-amber-300 font-bold">85/100</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="statEnergyBar" class="h-full bg-amber-400 stat-bar-fill" style="width: 85%"></div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-1.5 text-xs font-mono"><span class="text-rose-400">💖 CHARISMA:</span> <span id="statCharisma" class="font-bold text-white">Lv. 4 (42)</span></div>
+            <div class="flex items-center space-x-1.5 text-xs font-mono"><span class="text-cyan-400">✍️ MUSIC:</span> <span id="statMusic" class="font-bold text-white">Lv. 5 (58)</span></div>
+            <div class="flex items-center space-x-1.5 text-xs font-mono"><span class="text-amber-400">🌟 STARDOM:</span> <span id="statStardom" class="font-bold text-emerald-400">#3 Hot 100</span></div>
         </div>
 
         <div class="flex items-center space-x-2">
-            <div class="bg-[#08090d] p-1 rounded-2xl border border-[#242838] flex items-center space-x-1">
-                <button id="btnTabStory" onclick="window.switchTab('story')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-pink-600 text-white shadow-md">📖 Story</button>
-                <button id="btnTabStudio" onclick="window.switchTab('studio')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white">🎙️ Studio</button>
-                <button id="btnTabRoster" onclick="window.switchTab('roster')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white">💖 Love Interests</button>
+            <div class="bg-[#07080c] p-1 rounded-2xl border border-[#202434] flex items-center space-x-1">
+                <button id="btnTabStory" onclick="window.switchTab('story')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md">💬 Live AI Chat</button>
+                <button id="btnTabActions" onclick="window.switchTab('actions')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white">⚡ Activities</button>
+                <button id="btnTabStudio" onclick="window.switchTab('studio')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white">🎙️ Studio</button>
+                <button id="btnTabRoster" onclick="window.switchTab('roster')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white">💋 Heroines</button>
             </div>
-            <button onclick="window.toggleAudio()" id="btnAudio" class="px-3 py-1.5 rounded-xl bg-[#08090d] border border-[#242838] text-xs font-mono text-slate-300 hover:text-amber-300">
+            <button onclick="window.toggleAudio()" id="btnAudio" class="px-3 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-amber-300">
                 <span id="audioLabel">🔇 Audio OFF</span>
             </button>
+            <button onclick="window.openApiModal()" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-[#00ffcc]">⚙️ AI Key</button>
+            <button onclick="window.openSaveModal()" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-white">💾</button>
         </div>
     </header>
 
     <!-- MAIN VIEWS -->
     <main class="flex-1 flex overflow-hidden relative">
 
-        <!-- TAB 1: STORY -->
+        <!-- TAB 1: LIVE FREEFORM CONVERSATION -->
         <div id="tabStory" class="flex-1 flex flex-col h-full w-full relative">
-            <div id="storyStage" class="flex-1 w-full relative overflow-hidden bg-cover bg-center flex items-center justify-center" style="background-image: linear-gradient(to top, rgba(8,9,13,0.95), rgba(8,9,13,0.3)), url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80');">
+            <div id="storyStage" class="flex-1 w-full relative overflow-hidden bg-cover bg-center transition-all duration-700 flex items-end justify-center" style="background-image: linear-gradient(to top, rgba(7,8,12,0.95), rgba(7,8,12,0.2)), url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80');">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#07080c] via-transparent to-transparent pointer-events-none"></div>
+
                 <div class="absolute top-4 left-4 z-20 flex items-center space-x-2">
                     <div class="glass-panel px-3.5 py-1.5 rounded-2xl flex items-center space-x-2 text-xs">
-                        <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-ping"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
                         <span id="sceneLocationTag" class="font-mono font-bold text-amber-300">SUNSET STRIP • VIP AFTERPARTY</span>
                     </div>
-                    <div class="glass-panel px-3 py-1.5 rounded-2xl text-xs font-mono text-slate-300">
-                        <span id="chapterBadge">PROLOGUE</span>
-                    </div>
                 </div>
-                <div id="characterStageContainer" class="relative z-10 flex items-end justify-center h-full pb-2 space-x-6"></div>
+
+                <div class="absolute top-4 right-4 z-20 flex items-center space-x-1.5 bg-[#07080c]/90 p-1 rounded-2xl border border-[#202434]">
+                    <button onclick="window.switchChatTarget('sabrina')" id="char_tab_sabrina" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-rose-600 text-white">🎀 Sabrina</button>
+                    <button onclick="window.switchChatTarget('sydney')" id="char_tab_sydney" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">🌊 Sydney</button>
+                    <button onclick="window.switchChatTarget('taylor')" id="char_tab_taylor" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">👑 Taylor</button>
+                    <button onclick="window.switchChatTarget('jenna')" id="char_tab_jenna" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">🖤 Jenna</button>
+                    <button onclick="window.switchChatTarget('jennifer')" id="char_tab_jennifer" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">🔥 Jennifer</button>
+                    <button onclick="window.switchChatTarget('harem')" id="char_tab_harem" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-amber-300 hover:text-white border border-amber-500/40">🏆 All (Harem)</button>
+                </div>
+
+                <div id="characterStageContainer" class="relative z-10 flex items-end justify-center h-full pb-2"></div>
             </div>
 
-            <div class="h-64 border-t border-[#242838] dialogue-box p-5 flex flex-col justify-between shrink-0 z-20 shadow-2xl">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center space-x-2.5">
-                            <span id="speakerAvatar" class="text-xl">✨</span>
-                            <span id="speakerName" class="font-serif font-bold text-lg text-white">Narrator</span>
-                        </div>
-                        <div class="flex items-center space-x-3 text-xs text-slate-400 font-mono">
-                            <button onclick="window.prevDialogue()" class="hover:text-white">◀ Back</button>
-                            <button onclick="window.advanceStory()" class="px-3 py-1 rounded-xl bg-pink-600/80 hover:bg-pink-600 text-white font-bold">Next ▶</button>
-                        </div>
-                    </div>
-                    <p id="dialogueText" class="text-sm md:text-base text-slate-200 leading-relaxed max-w-5xl font-sans"></p>
+            <!-- Freeform Chat Conversation Log & Real-Time Input -->
+            <div class="h-80 border-t border-[#202434] dialogue-glass p-4 flex flex-col justify-between shrink-0 z-20 shadow-2xl">
+                <div id="chatFeed" class="flex-1 overflow-y-auto space-y-2.5 pr-2 mb-3 max-w-5xl mx-auto w-full text-xs"></div>
+
+                <div class="max-w-5xl mx-auto w-full flex items-center space-x-2 pt-1 border-t border-[#202434]/60">
+                    <input type="text" id="freeformInput" placeholder="Type anything to her... (e.g. *holds your hand* 'You were incredible on stage tonight')" onkeydown="if(event.key==='Enter') window.sendFreeformMessage()" class="flex-1 bg-[#07080c] border border-[#202434] focus:border-rose-500 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none">
+                    <button onclick="window.sendFreeformMessage()" id="btnSendChat" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:opacity-90 text-white text-xs sm:text-sm font-bold shadow-lg flex items-center space-x-1.5">
+                        <span>Send 💬</span>
+                    </button>
                 </div>
-                <div id="choicesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2"></div>
             </div>
         </div>
 
-        <!-- TAB 2: SOUND STUDIO -->
-        <div id="tabStudio" class="hidden flex-1 flex flex-col h-full w-full bg-[#08090d] overflow-y-auto p-6">
+        <!-- TAB 2: ACTIVITIES -->
+        <div id="tabActions" class="hidden flex-1 flex flex-col h-full w-full bg-[#07080c] overflow-y-auto p-6">
             <div class="max-w-4xl mx-auto w-full space-y-6">
-                <div class="glass-panel p-6 rounded-3xl border border-[#242838]">
-                    <span class="text-xs font-mono text-amber-400 uppercase font-bold">Studio Session</span>
-                    <h2 class="text-2xl font-serif font-black text-white mt-1">Record Your Next Hit Single</h2>
+                <div class="glass-panel p-6 rounded-3xl border border-[#202434] bg-gradient-to-r from-purple-950/40 via-[#10121a] to-rose-950/30">
+                    <span class="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold">Daily Management</span>
+                    <h2 class="text-2xl font-serif font-black text-white mt-1">Schedule Activities & Training</h2>
+                    <p class="text-xs text-slate-300 mt-1">Spend daily Energy to write songs, train charisma, or buy luxury gifts.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-panel p-5 rounded-3xl border border-[#202434] flex flex-col justify-between">
+                        <div>
+                            <div class="text-3xl mb-2">🎹</div>
+                            <h3 class="text-base font-serif font-bold text-white">Piano Session</h3>
+                            <p class="text-xs text-slate-300 mt-1">Compose fresh chord progressions and lyrical hooks in your home studio.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-[#202434] flex items-center justify-between">
+                            <span class="text-[11px] text-cyan-400 font-mono">+12 Music (-20 Energy)</span>
+                            <button onclick="window.performActivity('piano', 20, 12, 'music')" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold">Practice</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-3xl border border-[#202434] flex flex-col justify-between">
+                        <div>
+                            <div class="text-3xl mb-2">💪</div>
+                            <h3 class="text-base font-serif font-bold text-white">Conditioning & Style</h3>
+                            <p class="text-xs text-slate-300 mt-1">Hit the private gym and consult your personal wardrobe stylist.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-[#202434] flex items-center justify-between">
+                            <span class="text-[11px] text-rose-400 font-mono">+10 Charisma (-15 Energy)</span>
+                            <button onclick="window.performActivity('gym', 15, 10, 'charisma')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">Train</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-3xl border border-[#202434] flex flex-col justify-between">
+                        <div>
+                            <div class="text-3xl mb-2">🥂</div>
+                            <h3 class="text-base font-serif font-bold text-white">Private Rooftop Date</h3>
+                            <p class="text-xs text-slate-300 mt-1">Book a secluded dinner table overlooking the city lights with a heroine.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-[#202434] flex items-center justify-between">
+                            <span class="text-[11px] text-pink-400 font-mono">+15 Intimacy (-25 En, -$500)</span>
+                            <button onclick="window.openDatePickerModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white text-xs font-bold">Book Date</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-3xl border border-[#202434] flex flex-col justify-between md:col-span-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">🎁 Luxury Gift Boutique</h3>
+                            <span class="text-xs font-mono text-emerald-400">Wallet: <span id="giftShopWallet">$45,000</span></span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="window.buyAndGiveGift('perfume', 1200, 15)" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-pink-500 text-left">
+                                <div class="text-xl">🌸</div>
+                                <div class="text-xs font-bold text-white mt-1">French Perfume</div>
+                                <div class="text-[10px] text-pink-400 font-mono">$1,200 (+15 Chemistry)</div>
+                            </button>
+                            <button onclick="window.buyAndGiveGift('vinyl', 800, 18)" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-amber-500 text-left">
+                                <div class="text-xl">📀</div>
+                                <div class="text-xs font-bold text-white mt-1">Rare Vintage Vinyl</div>
+                                <div class="text-[10px] text-amber-400 font-mono">$800 (+18 Chemistry)</div>
+                            </button>
+                            <button onclick="window.buyAndGiveGift('necklace', 4500, 30)" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-rose-500 text-left">
+                                <div class="text-xl">💎</div>
+                                <div class="text-xs font-bold text-white mt-1">Diamond Starlight Pendant</div>
+                                <div class="text-[10px] text-rose-400 font-mono">$4,500 (+30 Intimacy)</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SOUND STUDIO -->
+        <div id="tabStudio" class="hidden flex-1 flex flex-col h-full w-full bg-[#07080c] overflow-y-auto p-6">
+            <div class="max-w-4xl mx-auto w-full space-y-6">
+                <div class="glass-panel p-6 rounded-3xl border border-[#202434]">
+                    <span class="text-xs font-mono text-amber-400 uppercase font-bold">Sound Studio</span>
+                    <h2 class="text-2xl font-serif font-black text-white mt-1">Record Your Next Chart-Topper</h2>
                     <p class="text-xs text-slate-300 mt-1">Combine lyricism, musical style, and collaborations to climb the Billboard charts.</p>
                 </div>
 
-                <div class="glass-panel p-5 rounded-3xl border border-[#242838]">
+                <div class="glass-panel p-5 rounded-3xl border border-[#202434]">
                     <h3 class="text-sm font-bold text-white uppercase mb-3">1. Select Musical Genre</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <button onclick="window.selectGenre('pop')" id="genre_pop" class="p-3 rounded-2xl bg-[#08090d] border border-pink-500 text-left font-bold text-xs text-white">✨ Synth Pop</button>
-                        <button onclick="window.selectGenre('acoustic')" id="genre_acoustic" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left font-bold text-xs text-slate-300">🎸 Acoustic Folk</button>
-                        <button onclick="window.selectGenre('rnb')" id="genre_rnb" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left font-bold text-xs text-slate-300">🌙 Midnight R&B</button>
-                        <button onclick="window.selectGenre('rock')" id="genre_rock" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left font-bold text-xs text-slate-300">⚡ Alt Rock</button>
+                        <button onclick="window.selectGenre('pop')" id="genre_pop" class="p-3 rounded-2xl bg-[#07080c] border border-pink-500 text-left font-bold text-xs text-white">✨ Synth Pop</button>
+                        <button onclick="window.selectGenre('acoustic')" id="genre_acoustic" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left font-bold text-xs text-slate-300">🎸 Acoustic Folk</button>
+                        <button onclick="window.selectGenre('rnb')" id="genre_rnb" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left font-bold text-xs text-slate-300">🌙 Midnight R&B</button>
+                        <button onclick="window.selectGenre('rock')" id="genre_rock" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left font-bold text-xs text-slate-300">⚡ Alt Rock</button>
                     </div>
                 </div>
 
-                <div class="glass-panel p-5 rounded-3xl border border-[#242838]">
+                <div class="glass-panel p-5 rounded-3xl border border-[#202434]">
                     <h3 class="text-sm font-bold text-white uppercase mb-3">2. Choose Collaboration Partner</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <button onclick="window.selectCollab('sabrina')" id="collab_sabrina" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left">
+                        <button onclick="window.selectCollab('sabrina')" id="collab_sabrina" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left">
                             <div class="text-lg">🎀</div>
                             <div class="font-bold text-xs text-white mt-1">Sabrina Carpenter</div>
-                            <div class="text-[10px] text-pink-400 font-mono">Pop Duet</div>
                         </button>
-                        <button onclick="window.selectCollab('sydney')" id="collab_sydney" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left">
+                        <button onclick="window.selectCollab('sydney')" id="collab_sydney" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left">
                             <div class="text-lg">🌊</div>
                             <div class="font-bold text-xs text-white mt-1">Sydney Sweeney</div>
-                            <div class="text-[10px] text-cyan-400 font-mono">Video Lead</div>
                         </button>
-                        <button onclick="window.selectCollab('taylor')" id="collab_taylor" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left">
+                        <button onclick="window.selectCollab('taylor')" id="collab_taylor" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left">
                             <div class="text-lg">👑</div>
                             <div class="font-bold text-xs text-white mt-1">Taylor Swift</div>
-                            <div class="text-[10px] text-amber-400 font-mono">Master Lyricist</div>
                         </button>
-                        <button onclick="window.selectCollab('jenna')" id="collab_jenna" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left">
+                        <button onclick="window.selectCollab('jenna')" id="collab_jenna" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left">
                             <div class="text-lg">🖤</div>
                             <div class="font-bold text-xs text-white mt-1">Jenna Ortega</div>
-                            <div class="text-[10px] text-purple-400 font-mono">Noir Concept</div>
                         </button>
-                        <button onclick="window.selectCollab('jennifer')" id="collab_jennifer" class="p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left">
+                        <button onclick="window.selectCollab('jennifer')" id="collab_jennifer" class="p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left">
                             <div class="text-lg">🔥</div>
                             <div class="font-bold text-xs text-white mt-1">Jennifer Lawrence</div>
-                            <div class="text-[10px] text-rose-400 font-mono">Movie Sync</div>
                         </button>
-                        <button onclick="window.selectCollab('harem')" id="collab_harem" class="p-3 rounded-2xl bg-[#08090d] border border-amber-500/60 bg-amber-950/20 text-left col-span-2 md:col-span-3">
+                        <button onclick="window.selectCollab('harem')" id="collab_harem" class="p-3 rounded-2xl bg-[#07080c] border border-amber-500/60 bg-amber-950/20 text-left col-span-2 md:col-span-3">
                             <div class="text-lg">✨🏆✨</div>
                             <div class="font-bold text-xs text-amber-300 mt-1">ALL-STAR ENSEMBLE (Harem Supergroup)</div>
-                            <div class="text-[10px] text-slate-300 font-mono">All 5 heroines unite for a worldwide crossover release!</div>
                         </button>
                     </div>
                 </div>
 
-                <button onclick="window.produceAndReleaseSong()" class="w-full py-4 rounded-3xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 text-white font-serif font-black text-sm uppercase tracking-wider shadow-2xl">
+                <button onclick="window.produceAndReleaseSong()" class="w-full py-4 rounded-3xl bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 text-white font-serif font-black text-sm uppercase tracking-wider shadow-2xl">
                     🔥 Finish Mixing & Release Worldwide
                 </button>
             </div>
         </div>
 
-        <!-- TAB 3: LOVE INTERESTS -->
-        <div id="tabRoster" class="hidden flex-1 flex flex-col h-full w-full bg-[#08090d] overflow-y-auto p-6">
+        <!-- TAB 4: HEROINES ROSTER -->
+        <div id="tabRoster" class="hidden flex-1 flex flex-col h-full w-full bg-[#07080c] overflow-y-auto p-6">
             <div class="max-w-5xl mx-auto w-full space-y-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-2xl font-serif font-black text-white">Heroine Relationship Status</h2>
-                        <p class="text-xs text-slate-400 mt-1">Track chemistry, intimacy milestones, and unlockable branch routes.</p>
+                        <h2 class="text-2xl font-serif font-black text-white">Heroine Romance & Intimacy Track</h2>
+                        <p class="text-xs text-slate-400 mt-1">Chat directly with any heroine to boost chemistry and unlock private moments.</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="rosterCardsGrid"></div>
@@ -158,127 +252,211 @@
         </div>
     </main>
 
-    <!-- ENGINE -->
+    <!-- DATE MODAL -->
+    <div id="modalDate" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-rose-500/40 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-serif font-bold text-white">🥂 Select a Heroine for a Private Intimate Date</h3>
+                <button onclick="window.closeDateModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="space-y-3 mb-4" id="dateChoicesList"></div>
+            <div class="flex justify-end">
+                <button onclick="window.closeDateModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 text-xs font-bold">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API KEY MODAL (FOR LIVE LLM CHAT) -->
+    <div id="modalApi" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-[#202434] rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-serif font-bold text-white flex items-center space-x-2">
+                    <span>⚙️ Live LLM API Key (Optional)</span>
+                </h3>
+                <button onclick="window.closeApiModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-xs text-slate-300 mb-3">
+                You can talk to the heroines using the built-in intelligent dialogue AI right now with zero setup. If you want infinite LLM streaming, you can optionally paste a Gemini or OpenAI key below:
+            </p>
+            <input type="password" id="userApiKeyInput" placeholder="Enter Gemini or OpenAI API Key..." class="w-full bg-[#07080c] border border-[#202434] focus:border-rose-500 rounded-xl px-3 py-2 text-xs text-white outline-none mb-3">
+            <div class="flex justify-end space-x-2">
+                <button onclick="window.saveApiKey()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Save Key</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAVE MODAL -->
+    <div id="modalSave" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-[#202434] rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-serif font-bold text-white">💾 Save & Load Game</h3>
+                <button onclick="window.closeSaveModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="space-y-3 mb-4">
+                <button onclick="window.saveGameSlot(1)" class="w-full p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-pink-500 text-left flex items-center justify-between text-xs">
+                    <span class="font-bold text-white">Save Slot 1</span>
+                    <span id="slot1Time" class="text-[10px] text-slate-400 font-mono">Empty</span>
+                </button>
+                <button onclick="window.loadGameSlot(1)" class="w-full p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-amber-500 text-left flex items-center justify-between text-xs">
+                    <span class="font-bold text-white">Load Slot 1</span>
+                    <span class="text-[10px] text-pink-400 font-mono">Load State</span>
+                </button>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="window.closeSaveModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
     <script>
         window.GameState = {
             currentTab: "story",
-            currentDialogueIndex: 0,
+            activeTarget: "sabrina",
             audioEnabled: false,
-            career: { currentSong: "Sunset Polaroid", chartRank: 4, fanHeat: 92 },
-            studioSelections: { genre: "pop", collab: "sabrina" },
-            affinities: { sabrina: 25, sydney: 20, taylor: 30, jenna: 15, jennifer: 20 }
+            apiKey: "",
+            player: {
+                name: "You",
+                energy: 85,
+                maxEnergy: 100,
+                charisma: 42,
+                musicSkill: 58,
+                funds: 45000,
+                day: 1,
+                timeOfDay: "Evening"
+            },
+            career: {
+                currentSong: "Sunset Polaroid",
+                chartRank: 3,
+                fanHeat: 94
+            },
+            studioSelections: {
+                genre: "pop",
+                collab: "sabrina"
+            },
+            affinities: {
+                sabrina: 35,
+                sydney: 30,
+                taylor: 40,
+                jenna: 25,
+                jennifer: 30
+            },
+            intimacyStages: {
+                sabrina: "Level 2: Teasing Flirtation",
+                sydney: "Level 2: Soft Confidences",
+                taylor: "Level 2: Creative Sparring",
+                jenna: "Level 1: Curious Fascination",
+                jennifer: "Level 2: Unfiltered Realness"
+            },
+            chatHistories: {
+                sabrina: [
+                    { sender: "Sabrina Carpenter", text: "Look who escaped the label executives! You played that minor seventh chord drop during soundcheck today... you looked dangerous on stage with that acoustic guitar. 😉", isUser: false }
+                ],
+                sydney: [
+                    { sender: "Sydney Sweeney", text: "Hey... the ocean breeze is so warm out here. Everyone inside is talking so fast. It's nice to be around someone who makes me feel safe. ❤️", isUser: false }
+                ],
+                taylor: [
+                    { sender: "Taylor Swift", text: "That lyric in your bridge—'building bridges just to see which way the smoke blows'—that's real songwriting. Sit beside me at the piano, let's write something legendary. ✨", isUser: false }
+                ],
+                jenna: [
+                    { sender: "Jenna Ortega", text: "I watch people wear masks in this town every day. But with you, I actually feel like I can take a breath. What's on your mind? 🖤", isUser: false }
+                ],
+                jennifer: [
+                    { sender: "Jennifer Lawrence", text: "I just smuggled four mini grilled cheese sandwiches from VIP catering before the agents ate them all. Are you going to sit next to me and eat one or what? 🔥", isUser: false }
+                ],
+                harem: [
+                    { sender: "The All-Star Ensemble", text: "All five of us are right here in the penthouse with you. We've got guitars, vintage champagne, and zero paparazzi. What are we doing tonight? 🏆", isUser: false }
+                ]
+            }
         };
 
         window.Heroines = {
-            sabrina: { name: "Sabrina Carpenter", role: "Pop Sensation & Tour Partner", avatar: "🎀", vibe: "Sweet & Spicy", bio: "Petite, razor-sharp, and turning soundchecks into late-night songwriting games." },
-            sydney: { name: "Sydney Sweeney", role: "Acclaimed Hollywood Actress", avatar: "🌊", vibe: "Warm & Gentle", bio: "Soft-spoken and grounded behind red carpets. Loves sunset coastal drives." },
-            taylor: { name: "Taylor Swift", role: "Global Icon & Master Songwriter", avatar: "👑", vibe: "Lyrical Genius", bio: "A musical powerhouse who spots the raw authenticity in your songs." },
-            jenna: { name: "Jenna Ortega", role: "Gothic Noir Star & Auteur", avatar: "🖤", vibe: "Witty & Loyal", bio: "Intense and perceptive. Softens once she realizes your kindness is genuine." },
-            jennifer: { name: "Jennifer Lawrence", role: "Oscar-Winning Powerhouse", avatar: "🔥", vibe: "Chaotic & Real", bio: "Tired of Hollywood pretension, bringing unfiltered humor and unforgettable road trips." }
+            sabrina: {
+                name: "Sabrina Carpenter",
+                role: "Pop Sensation & Tour Partner",
+                avatar: "🎀",
+                vibe: "Sweet & Spicy • Teasing Banter",
+                portrait: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80",
+                bio: "Petite, razor-sharp, and turning soundchecks into late-night songwriting games and intimate rooftop kisses."
+            },
+            sydney: {
+                name: "Sydney Sweeney",
+                role: "Acclaimed Hollywood Actress",
+                avatar: "🌊",
+                vibe: "Warm • Gentle Intensity",
+                portrait: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80",
+                bio: "Soft-spoken, curvy, and grounded. Craves private candlelit evenings and sunset drives in Malibu away from flashbulbs."
+            },
+            taylor: {
+                name: "Taylor Swift",
+                role: "Global Icon & Master Songwriter",
+                avatar: "👑",
+                vibe: "Lyrical Powerhouse • Poetic Passion",
+                portrait: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80",
+                bio: "A lyrical genius who spots the raw soul in your music. Passionate, protective, and deeply romantic behind closed studio doors."
+            },
+            jenna: {
+                name: "Jenna Ortega",
+                role: "Gothic Noir Star & Auteur",
+                avatar: "🖤",
+                vibe: "Dark Elegance • Fierce Loyalty",
+                portrait: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1600&q=80",
+                bio: "Striking dark eyes and sharp features. Unapologetically genuine, she pulls you into intense, quiet midnight encounters."
+            },
+            jennifer: {
+                name: "Jennifer Lawrence",
+                role: "Oscar-Winning Powerhouse",
+                avatar: "🔥",
+                vibe: "Chaotic Realness • Passionate Laughs",
+                portrait: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1600&q=80",
+                bio: "Blonde, athletic, and completely unfiltered. Loves stealing food, spontaneous motel road trips, and passionate romance with zero ego."
+            },
+            harem: {
+                name: "The All-Star Ensemble",
+                role: "The Ultimate Hollywood Inner Circle",
+                avatar: "🏆",
+                vibe: "United Devotion • Global Powerhouse",
+                portrait: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
+                bg: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80",
+                bio: "All five heroines united by genuine affection and mutual support, sharing fame, music, and an unbreakable romantic bond."
+            }
         };
 
-        window.StoryScript = [
-            {
-                location: "HOLLYWOOD HILLS • ROOFTOP GALA",
-                chapter: "PROLOGUE",
-                speaker: "Narrator",
-                avatar: "✨",
-                text: "Three months ago, you recorded an acoustic demo in your bedroom. Tonight, it sits at #4 on the global charts. Below you, the lights of Los Angeles stretch like diamonds.",
-                choices: [
-                    { text: "Take a deep breath and stay grounded.", effect: () => { window.modAffinityAll(5); }, next: 1 },
-                    { text: "Look around for someone interesting to talk to.", effect: () => {}, next: 1 }
-                ]
-            },
-            {
-                location: "ROOFTOP TERRACE • SUNSET STRIP",
-                chapter: "CHAPTER 1",
-                speaker: "Sabrina Carpenter",
-                avatar: "🎀",
-                text: "\"Look who escaped the label executives! You played that minor seventh chord drop during soundcheck today... you never told me you wrote songs like that.\"",
-                choices: [
-                    { text: "\"I was worried you\'d tease me for writing something too catchy.\"", effect: () => { window.modAffinity("sabrina", 15); }, next: 2 },
-                    { text: "\"I picked it up watching your live acoustic set.\"", effect: () => { window.modAffinity("sabrina", 20); }, next: 2 }
-                ]
-            },
-            {
-                location: "CATERING COURTYARD • AFTERPARTY",
-                chapter: "CHAPTER 1",
-                speaker: "Jennifer Lawrence",
-                avatar: "🔥",
-                text: "\"Psst! Catch! I just smuggled four mini grilled cheese sandwiches from VIP catering before the agents ate them all. Are you going to be pretentious or are you hungry?\"",
-                choices: [
-                    { text: "\"You just saved my life. I haven\'t eaten since soundcheck.\"", effect: () => { window.modAffinity("jennifer", 20); }, next: 3 },
-                    { text: "\"Is smuggling appetizers your signature award show move?\"", effect: () => { window.modAffinity("jennifer", 15); }, next: 3 }
-                ]
-            },
-            {
-                location: "QUIET BALCONY • VIP SUITE",
-                chapter: "CHAPTER 1",
-                speaker: "Sydney Sweeney",
-                avatar: "🌊",
-                text: "\"Hey... mind if I catch some air out here with you? Everyone inside is talking so fast. It\'s nice to meet someone who looks like they\'re actually breathing.\"",
-                choices: [
-                    { text: "\"No flashbulbs out here. Take all the time you need.\"", effect: () => { window.modAffinity("sydney", 20); }, next: 4 },
-                    { text: "\"I usually get overwhelmed after 20 minutes at these things.\"", effect: () => { window.modAffinity("sydney", 15); }, next: 4 }
-                ]
-            },
-            {
-                location: "VINYL LOUNGE • PRIVATE ROOM",
-                chapter: "CHAPTER 1",
-                speaker: "Jenna Ortega",
-                avatar: "🖤",
-                text: "\"I watched your interview earlier. Usually pop stars rehearse their humility, but you actually looked genuinely surprised by your own success.\"",
-                choices: [
-                    { text: "\"Still feels like I\'m going to wake up in my old apartment.\"", effect: () => { window.modAffinity("jenna", 20); }, next: 5 },
-                    { text: "\"I try not to believe my own press clippings.\"", effect: () => { window.modAffinity("jenna", 15); }, next: 5 }
-                ]
-            },
-            {
-                location: "GRAND PIANO SUITE • RECORDING ESTATE",
-                chapter: "CHAPTER 1",
-                speaker: "Taylor Swift",
-                avatar: "👑",
-                text: "\"That lyric in your second verse—\'building bridges just to see which way the smoke blows\'—that\'s real songwriting. Let\'s get into the studio this week and write something timeless.\"",
-                choices: [
-                    { text: "\"I have a notebook full of acoustic drafts ready for you.\"", effect: () => { window.modAffinity("taylor", 20); }, next: 6 },
-                    { text: "\"It would be an honor to write with you, Taylor.\"", effect: () => { window.modAffinity("taylor", 15); }, next: 6 }
-                ]
-            },
-            {
-                location: "WORLD ARENA TOUR • THE FINALE CROSSROADS",
-                chapter: "FINALE",
-                speaker: "Narrator",
-                avatar: "🏆",
-                text: "Your album has reached #1 worldwide. Tonight is your headline arena debut at the Hollywood Bowl. How do you close the monumental tour?",
-                choices: [
-                    { text: "👑 The All-Star Ensemble (True Harmony / Harem Ending)", effect: () => { window.triggerEnding("harem"); }, next: 7 },
-                    { text: "🎀 Invite Sabrina for the Acoustic Duet Finale", effect: () => { window.triggerEnding("sabrina"); }, next: 7 },
-                    { text: "🌊 Invite Sydney for the Cinematic Sunset Escape", effect: () => { window.triggerEnding("sydney"); }, next: 7 },
-                    { text: "👑 Co-Headline Arena Anthem with Taylor", effect: () => { window.triggerEnding("taylor"); }, next: 7 },
-                    { text: "🖤 Escape to the Late-Night Noir Set with Jenna", effect: () => { window.triggerEnding("jenna"); }, next: 7 },
-                    { text: "🔥 Hit the Open Highway on a Road Trip with Jennifer", effect: () => { window.triggerEnding("jennifer"); }, next: 7 }
-                ]
-            },
-            {
-                location: "HOLLYWOOD BOWL • STARRY NIGHT",
-                chapter: "EPILOGUE",
-                speaker: "Narrator",
-                avatar: "🌟",
-                text: "The crowd erupts into deafening cheers under the California stars. You look around, grounded, grateful, and surrounded by the people who truly believe in you. This is only the beginning.",
-                choices: [
-                    { text: "▶ Play Again or Explore Another Route", effect: () => { window.restartGame(); }, next: 0 }
-                ]
-            }
-        ];
-
-        class WebSynth {
-            constructor() { this.ctx = null; }
+        class GameAudioSynth {
+            constructor() { this.ctx = null; this.pad = null; this.padGain = null; }
             init() {
                 if (!this.ctx) {
                     const AC = window.AudioContext || window.webkitAudioContext;
-                    if (AC) this.ctx = new AC();
+                    if (AC) {
+                        this.ctx = new AC();
+                        this.padGain = this.ctx.createGain();
+                        this.padGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                        this.padGain.connect(this.ctx.destination);
+                    }
                 }
                 if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+            }
+            startPad() {
+                if (!window.GameState.audioEnabled || !this.ctx) return;
+                this.stopPad();
+                try {
+                    this.pad = this.ctx.createOscillator();
+                    this.pad.type = "sine";
+                    this.pad.frequency.setValueAtTime(196.00, this.ctx.currentTime);
+                    this.pad.connect(this.padGain);
+                    this.pad.start();
+                } catch(e){}
+            }
+            stopPad() {
+                if (this.pad) {
+                    try { this.pad.stop(); } catch(e){}
+                    this.pad = null;
+                }
             }
             playChime(freq, dur=0.15) {
                 if (!window.GameState.audioEnabled) return;
@@ -287,7 +465,7 @@
                 try {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    osc.type = "sine";
+                    osc.type = "triangle";
                     osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
                     gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
@@ -298,70 +476,178 @@
                 } catch(e){}
             }
         }
-        const synth = new WebSynth();
+        const sound = new GameAudioSynth();
 
-        function renderStoryStep() {
-            const step = window.StoryScript[window.GameState.currentDialogueIndex];
-            if (!step) return;
+        function renderChatView() {
+            const targetKey = window.GameState.activeTarget;
+            const h = window.Heroines[targetKey] || window.Heroines.sabrina;
 
-            const locEl = document.getElementById("sceneLocationTag"); if (locEl) locEl.innerText = step.location;
-            const chapEl = document.getElementById("chapterBadge"); if (chapEl) chapEl.innerText = step.chapter;
-            const nameEl = document.getElementById("speakerName"); if (nameEl) nameEl.innerText = step.speaker;
-            const avEl = document.getElementById("speakerAvatar"); if (avEl) avEl.innerText = step.avatar;
-            const textEl = document.getElementById("dialogueText"); if (textEl) textEl.innerText = step.text;
+            const stage = document.getElementById("storyStage");
+            if (stage && h.bg) {
+                stage.style.backgroundImage = "linear-gradient(to top, rgba(7,8,12,0.95), rgba(7,8,12,0.25)), url('" + h.bg + "')";
+            }
 
             const stageContainer = document.getElementById("characterStageContainer");
             if (stageContainer) {
                 stageContainer.innerHTML = "";
-                const hKey = Object.keys(window.Heroines).find(k => window.Heroines[k].name === step.speaker);
-                if (hKey) {
-                    const h = window.Heroines[hKey];
-                    const card = document.createElement("div");
-                    card.className = "glass-panel p-5 rounded-3xl border border-pink-500/40 shadow-2xl flex flex-col items-center animate-fade";
-                    card.innerHTML = `
-                        <div class="text-6xl mb-2">${h.avatar}</div>
-                        <div class="font-serif font-black text-lg text-white">${h.name}</div>
-                        <div class="text-[11px] text-pink-300 font-mono font-bold">${h.role}</div>
-                        <div class="mt-2 text-[10px] px-2 py-0.5 rounded-full bg-pink-950/90 text-pink-200 border border-pink-500/30">Chemistry: ${window.GameState.affinities[hKey]}%</div>
+                const aff = window.GameState.affinities[targetKey] || 50;
+                const stageName = window.GameState.intimacyStages[targetKey] || "Level 2: Teasing Flirtation";
+                const card = document.createElement("div");
+                card.className = "glass-panel p-4 rounded-3xl border border-rose-500/50 shadow-2xl flex flex-col items-center portrait-frame max-w-xs animate-fade";
+                card.innerHTML = `
+                    <div class="w-44 h-52 rounded-2xl overflow-hidden mb-2 border-2 border-rose-500/40 relative shadow-inner">
+                        <img src="${h.portrait}" alt="${h.name}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-1 right-1 text-2xl">${h.avatar}</div>
+                    </div>
+                    <div class="font-serif font-black text-base text-white">${h.name}</div>
+                    <div class="text-[10px] text-rose-300 font-mono font-bold">${h.vibe}</div>
+                    <div class="mt-1 text-[10px] px-3 py-0.5 rounded-full bg-rose-950/90 text-rose-200 border border-rose-500/40 font-mono">
+                        ${targetKey === "harem" ? "All-Star Supergroup" : "Chemistry: " + aff + "% • " + stageName}
+                    </div>
+                `;
+                stageContainer.appendChild(card);
+            }
+
+            const feed = document.getElementById("chatFeed");
+            if (feed) {
+                feed.innerHTML = "";
+                const history = window.GameState.chatHistories[targetKey] || [];
+                history.forEach(msg => {
+                    const bubble = document.createElement("div");
+                    bubble.className = msg.isUser ? "flex justify-end" : "flex justify-start";
+                    
+                    const inner = document.createElement("div");
+                    inner.className = msg.isUser ? "chat-bubble-user p-3 max-w-lg text-white shadow-md text-xs leading-relaxed" : "chat-bubble-ai p-3 max-w-lg text-slate-200 shadow-md text-xs leading-relaxed";
+                    
+                    inner.innerHTML = msg.isUser ? `<div>${msg.text}</div>` : `
+                        <div class="font-bold text-[11px] text-rose-300 font-serif mb-1 flex items-center space-x-1.5">
+                            <span>${h.avatar}</span>
+                            <span>${msg.sender}</span>
+                        </div>
+                        <div>${msg.text}</div>
                     `;
-                    stageContainer.appendChild(card);
-                }
-            }
-
-            const choicesEl = document.getElementById("choicesContainer");
-            if (choicesEl) {
-                choicesEl.innerHTML = "";
-                step.choices.forEach(ch => {
-                    const btn = document.createElement("button");
-                    btn.className = "p-3 rounded-2xl bg-[#08090d]/90 border border-[#242838] hover:border-pink-500 hover:bg-pink-950/20 text-left text-xs font-semibold text-slate-200 transition-all shadow-md";
-                    btn.innerText = ch.text;
-                    btn.onclick = () => {
-                        synth.playChime(600);
-                        if (ch.effect) ch.effect();
-                        window.GameState.currentDialogueIndex = ch.next;
-                        renderStoryStep();
-                        renderRoster();
-                    };
-                    choicesEl.appendChild(btn);
+                    bubble.appendChild(inner);
+                    feed.appendChild(bubble);
                 });
+                feed.scrollTop = feed.scrollHeight;
             }
         }
 
-        function advanceStory() {
-            if (window.GameState.currentDialogueIndex < window.StoryScript.length - 1) {
-                window.GameState.currentDialogueIndex++;
-                synth.playChime(550, 0.08);
-                renderStoryStep();
-            }
+        function switchChatTarget(key) {
+            window.GameState.activeTarget = key;
+            ['sabrina', 'sydney', 'taylor', 'jenna', 'jennifer', 'harem'].forEach(k => {
+                const btn = document.getElementById("char_tab_" + k);
+                if (btn) {
+                    if (k === key) {
+                        btn.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-rose-600 text-white shadow-md";
+                    } else {
+                        btn.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
+                    }
+                }
+            });
+            sound.playChime(600, 0.05);
+            renderChatView();
         }
 
-        function prevDialogue() {
-            if (window.GameState.currentDialogueIndex > 0) {
-                window.GameState.currentDialogueIndex--;
-                synth.playChime(450, 0.08);
-                renderStoryStep();
-            }
+        function sendFreeformMessage() {
+            const input = document.getElementById("freeformInput");
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = "";
+
+            const targetKey = window.GameState.activeTarget;
+            const h = window.Heroines[targetKey] || window.Heroines.sabrina;
+
+            if (!window.GameState.chatHistories[targetKey]) window.GameState.chatHistories[targetKey] = [];
+            window.GameState.chatHistories[targetKey].push({
+                sender: "You",
+                text: text,
+                isUser: true
+            });
+            sound.playChime(500, 0.05);
+            renderChatView();
+
+            generateAiResponse(targetKey, text);
         }
+
+        function generateAiResponse(targetKey, userText) {
+            const h = window.Heroines[targetKey] || window.Heroines.sabrina;
+            const lower = userText.toLowerCase();
+
+            if (targetKey !== "harem") {
+                window.modAffinity(targetKey, 5);
+                window.advanceIntimacy(targetKey);
+                updateRpgHeader();
+                renderRoster();
+            }
+
+            setTimeout(() => {
+                sound.playChime(700, 0.15);
+                let reply = "";
+
+                if (targetKey === "sabrina") {
+                    if (lower.includes("kiss") || lower.includes("love") || lower.includes("beautiful") || lower.includes("cute")) {
+                        reply = "*She laughs softly, biting her lip with a blush and stepping close enough for you to smell vanilla perfume.* 'You are being dangerous tonight... but do not stop. Lean down here and give me that kiss before someone catches us.' 💋";
+                    } else if (lower.includes("song") || lower.includes("tour") || lower.includes("music") || lower.includes("acoustic")) {
+                        reply = "'I was thinking about that bridge we started earlier. Grab your guitar, sit next to me on the sofa, and let us figure out the harmony. You bring the melody, I will bring the attitude.' 🎸✨";
+                    } else if (lower.includes("hug") || lower.includes("hold") || lower.includes("hand")) {
+                        reply = "*She slips her small hand into yours, interlocking her fingers with an affectionate smile.* 'I needed this. Everything is so loud outside, but with you it is peaceful.' ❤️";
+                    } else {
+                        reply = "*She smirks playfully, leaning against the balcony railing.* '" + (userText.length > 20 ? "You always know how to say exactly what makes my heart skip." : "Is that your best line, rockstar?") + " Come sit next to me and tell me what you are thinking.' 🎀";
+                    }
+                } else if (targetKey === "sydney") {
+                    if (lower.includes("kiss") || lower.includes("love") || lower.includes("beautiful") || lower.includes("hold")) {
+                        reply = "*Her blue eyes soften as her cheeks flush pink. She gently places her hands on your chest.* 'You have no idea how long I have wanted you to say that... kiss me before the night is over.' 🌊💋";
+                    } else if (lower.includes("drive") || lower.includes("car") || lower.includes("beach") || lower.includes("malibu")) {
+                        reply = "'Let us take my vintage Ford Bronco down to the coast. Windows down, Pacific ocean air, just you and me on the highway.' 🚗🌅";
+                    } else {
+                        reply = "*She lets out a warm, relieved laugh and leans her head softly on your shoulder.* 'Being around you makes the craziness of Hollywood completely disappear. I am so glad you are here with me.' ❤️";
+                    }
+                } else if (targetKey === "taylor") {
+                    if (lower.includes("kiss") || lower.includes("love") || lower.includes("intimate") || lower.includes("stay")) {
+                        reply = "*She pauses at the grand piano, her gaze locking with yours in the warm studio lighting.* 'People write whole albums looking for what we have right now. Come here... lock the door and do not let anyone in tonight.' 👑💋";
+                    } else if (lower.includes("lyric") || lower.includes("song") || lower.includes("write") || lower.includes("chords")) {
+                        reply = "'Sing that line again into the mic. That vocal nuance in your voice gave me actual chills. We are writing a Grammy record tonight, no doubt about it.' ✍️✨";
+                    } else {
+                        reply = "*She smiles thoughtfully, jotting a lyric in her leather notebook.* 'You have a rare gift—you see the world as poetry, not just headlines. Keep talking, you are inspiring my next verse.' 🌟";
+                    }
+                } else if (targetKey === "jenna") {
+                    if (lower.includes("kiss") || lower.includes("love") || lower.includes("touch") || lower.includes("closer")) {
+                        reply = "*Her intense dark eyes lock onto yours, her guarded exterior completely melting as she steps into your arms.* 'I never let people get this close... but with you, I do not want to pull away. Kiss me.' 🖤💋";
+                    } else if (lower.includes("movie") || lower.includes("set") || lower.includes("dark") || lower.includes("vinyl")) {
+                        reply = "'Let us ditch this party and go to that underground vinyl vault in Silver Lake. We can put on vintage records and talk until 4 AM.' 📀🌙";
+                    } else {
+                        reply = "*She crosses her arms, letting out a rare, genuine smile.* 'You are the only person in this entire room who is not performing for the cameras. That is why I like you.' 🖤";
+                    }
+                } else if (targetKey === "jennifer") {
+                    if (lower.includes("kiss") || lower.includes("love") || lower.includes("bed") || lower.includes("sexy")) {
+                        reply = "*She bursts into a surprised laugh, then wraps her arms tightly around your neck with a passionate grin.* 'Well damn! Do not make a girl wait around. Come here and kiss me, rockstar!' 🔥💋";
+                    } else if (lower.includes("food") || lower.includes("eat") || lower.includes("road trip") || lower.includes("diner")) {
+                        reply = "'We are officially hitting a 24-hour waffle diner in our sweatpants at midnight. No fancy clothes, no security guards, just double hashbrowns and you.' 🥞🚗";
+                    } else {
+                        reply = "*She laughs loudly, shoving a dessert pastry into your hand.* 'See? You and me, we are normal people who somehow survived this weird fame circus. That is why we are unbeatable.' 🍕✨";
+                    }
+                } else if (targetKey === "harem") {
+                    reply = "*Sabrina hands you an acoustic guitar while Sydney pours champagne. Taylor starts a piano melody, Jenna smiles from the velvet armchair, and Jennifer cheers.* 'We are the ultimate team! As long as we have each other, Hollywood has nothing on us.' 🏆👑💖";
+                }
+
+                window.GameState.chatHistories[targetKey].push({
+                    sender: h.name,
+                    text: reply,
+                    isUser: false
+                });
+                renderChatView();
+            }, 650);
+        }
+
+        function saveApiKey() {
+            window.GameState.apiKey = document.getElementById("userApiKeyInput").value.trim();
+            closeApiModal();
+            alert("API Key saved! Live AI generative streaming mode ready.");
+        }
+
+        function openApiModal() { document.getElementById("modalApi").classList.remove("hidden"); }
+        function closeApiModal() { document.getElementById("modalApi").classList.add("hidden"); }
 
         function modAffinity(heroine, val) {
             if (window.GameState.affinities[heroine] !== undefined) {
@@ -375,20 +661,91 @@
             });
         }
 
-        function triggerEnding(type) {
-            synth.playChime(800, 0.3);
-            if (type === "harem") {
-                alert("🏆 TRUE ENSEMBLE ENDING UNLOCKED!\nYou, Sabrina, Sydney, Taylor, Jenna, and Jennifer form the ultimate Hollywood powerhouse inner circle, supporting one another through global stardom and unconditional love!");
-            } else {
-                const name = window.Heroines[type]?.name || type;
-                alert(`💖 SPECIAL ROMANCE ENDING UNLOCKED with ${name}! You shared a quiet, unforgettable moment away from the paparazzi spotlight.`);
-            }
+        function advanceIntimacy(heroine) {
+            const aff = window.GameState.affinities[heroine];
+            if (aff >= 80) window.GameState.intimacyStages[heroine] = "Level 4: Deep Passion & Physical Intimacy";
+            else if (aff >= 50) window.GameState.intimacyStages[heroine] = "Level 3: Romantic Devotion & Kiss";
+            else window.GameState.intimacyStages[heroine] = "Level 2: Teasing Flirtation";
         }
 
-        function restartGame() {
-            window.GameState.currentDialogueIndex = 0;
-            renderStoryStep();
+        function updateRpgHeader() {
+            const p = window.GameState.player;
+            document.getElementById("statEnergyVal").innerText = `${p.energy}/${p.maxEnergy}`;
+            document.getElementById("statEnergyBar").style.width = `${(p.energy / p.maxEnergy) * 100}%`;
+            document.getElementById("statCharisma").innerText = `Lv. 4 (${p.charisma})`;
+            document.getElementById("statMusic").innerText = `Lv. 5 (${p.musicSkill})`;
+            document.getElementById("playerFunds").innerText = `$${p.funds.toLocaleString()}`;
+            document.getElementById("playerDayTime").innerText = `Day ${p.day} • ${p.timeOfDay}`;
+            const gWallet = document.getElementById("giftShopWallet");
+            if (gWallet) gWallet.innerText = `$${p.funds.toLocaleString()}`;
         }
+
+        function performActivity(type, energyCost, gain, statType) {
+            const p = window.GameState.player;
+            if (p.energy < energyCost) {
+                alert("You are exhausted! Rest or sleep to recover energy.");
+                return;
+            }
+            sound.playChime(700, 0.15);
+            p.energy -= energyCost;
+            if (statType === "music") p.musicSkill += gain;
+            if (statType === "charisma") p.charisma += gain;
+            updateRpgHeader();
+            alert(`Activity completed! +${gain} to ${statType.toUpperCase()}!`);
+        }
+
+        function buyAndGiveGift(item, cost, chemGain) {
+            const p = window.GameState.player;
+            if (p.funds < cost) {
+                alert("Insufficient funds in your account.");
+                return;
+            }
+            p.funds -= cost;
+            modAffinityAll(chemGain);
+            sound.playChime(800, 0.2);
+            updateRpgHeader();
+            renderRoster();
+            alert(`Gift presented! All heroines' chemistry and intimacy increased by +${chemGain}%!`);
+        }
+
+        function openDatePickerModal() {
+            const modal = document.getElementById("modalDate");
+            const list = document.getElementById("dateChoicesList");
+            list.innerHTML = "";
+
+            Object.keys(window.Heroines).forEach(k => {
+                if (k === "harem") return;
+                const h = window.Heroines[k];
+                const btn = document.createElement("button");
+                btn.className = "w-full p-3 rounded-2xl bg-[#07080c] border border-[#202434] hover:border-rose-500 flex items-center justify-between text-left";
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${h.avatar}</span>
+                        <div>
+                            <div class="text-xs font-bold text-white">${h.name}</div>
+                            <div class="text-[10px] text-rose-300 font-mono">${window.GameState.intimacyStages[k]}</div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-rose-400 font-mono font-bold">Invite Date ▶</span>
+                `;
+                btn.onclick = () => {
+                    window.GameState.player.energy = Math.max(0, window.GameState.player.energy - 25);
+                    window.GameState.player.funds = Math.max(0, window.GameState.player.funds - 500);
+                    modAffinity(k, 25);
+                    advanceIntimacy(k);
+                    updateRpgHeader();
+                    renderRoster();
+                    closeDateModal();
+                    switchChatTarget(k);
+                    switchTab('story');
+                    alert(`Private date with ${h.name} started! You can now chat freely with her on the stage.`);
+                };
+                list.appendChild(btn);
+            });
+            modal.classList.remove("hidden");
+        }
+
+        function closeDateModal() { document.getElementById("modalDate").classList.add("hidden"); }
 
         function renderRoster() {
             const grid = document.getElementById("rosterCardsGrid");
@@ -396,30 +753,37 @@
             grid.innerHTML = "";
 
             Object.keys(window.Heroines).forEach(key => {
+                if (key === "harem") return;
                 const h = window.Heroines[key];
                 const aff = window.GameState.affinities[key] || 0;
+                const stage = window.GameState.intimacyStages[key] || "Level 1: Acquaintance";
                 const card = document.createElement("div");
-                card.className = "glass-panel p-5 rounded-3xl border border-[#242838] flex flex-col justify-between";
+                card.className = "glass-panel p-5 rounded-3xl border border-[#202434] flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center space-x-3 mb-3">
-                            <span class="text-3xl">${h.avatar}</span>
+                            <div class="w-14 h-14 rounded-2xl overflow-hidden border border-rose-500/40">
+                                <img src="${h.portrait}" alt="${h.name}" class="w-full h-full object-cover">
+                            </div>
                             <div>
                                 <h4 class="font-serif font-bold text-white text-base">${h.name}</h4>
-                                <div class="text-[10px] text-pink-400 font-mono font-semibold">${h.role}</div>
+                                <div class="text-[10px] text-rose-400 font-mono font-semibold">${h.role}</div>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-300 leading-relaxed mb-3">${h.bio}</p>
-                        <div class="text-[10px] text-slate-400 font-mono mb-1">VIBE: ${h.vibe}</div>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-2">${h.bio}</p>
+                        <div class="text-[10px] text-amber-300 font-mono mb-2 font-bold">INTIMACY: ${stage}</div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-xs mb-1 font-mono">
-                            <span class="text-slate-400">Affinity Level:</span>
-                            <span class="font-bold text-pink-400">${aff}%</span>
+                            <span class="text-slate-400">Chemistry:</span>
+                            <span class="font-bold text-rose-400">${aff}%</span>
                         </div>
-                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-pink-500 to-amber-400" style="width: ${aff}%"></div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-3">
+                            <div class="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400" style="width: ${aff}%"></div>
                         </div>
+                        <button onclick="window.switchChatTarget('${key}'); window.switchTab('story');" class="w-full py-2 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold font-mono">
+                            💬 Chat Privately
+                        </button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -430,9 +794,9 @@
             window.GameState.studioSelections.genre = g;
             ["pop", "acoustic", "rnb", "rock"].forEach(id => {
                 const btn = document.getElementById(`genre_${id}`);
-                if (btn) btn.className = id === g ? "p-3 rounded-2xl bg-[#08090d] border border-pink-500 text-left font-bold text-xs text-white" : "p-3 rounded-2xl bg-[#08090d] border border-[#242838] text-left font-bold text-xs text-slate-300";
+                if (btn) btn.className = id === g ? "p-3 rounded-2xl bg-[#07080c] border border-pink-500 text-left font-bold text-xs text-white" : "p-3 rounded-2xl bg-[#07080c] border border-[#202434] text-left font-bold text-xs text-slate-300";
             });
-            synth.playChime(500, 0.05);
+            sound.playChime(500, 0.05);
         }
 
         function selectCollab(c) {
@@ -441,66 +805,109 @@
                 const btn = document.getElementById(`collab_${id}`);
                 if (btn) {
                     if (id === c) {
-                        btn.classList.add("border-pink-500", "bg-pink-950/30");
-                        btn.classList.remove("border-[#242838]");
+                        btn.classList.add("border-pink-500", "bg-rose-950/30");
+                        btn.classList.remove("border-[#202434]");
                     } else {
-                        btn.classList.remove("border-pink-500", "bg-pink-950/30");
-                        btn.classList.add("border-[#242838]");
+                        btn.classList.remove("border-pink-500", "bg-rose-950/30");
+                        btn.classList.add("border-[#202434]");
                     }
                 }
             });
-            synth.playChime(650, 0.05);
+            sound.playChime(650, 0.05);
         }
 
         function produceAndReleaseSong() {
-            synth.playChime(700, 0.2);
-            const titles = ["Golden Hour Whispers", "Starlight Overdrive", "Midnight In Malibu", "Bridges We Built", "Heartstrings on Tape"];
+            sound.playChime(750, 0.25);
+            const titles = ["Midnight In Malibu", "Heartstrings on Tape", "Starlight Overdrive", "Golden Hour Whispers", "Bridges We Built"];
             const chosen = titles[Math.floor(Math.random() * titles.length)];
             const rank = Math.floor(Math.random() * 3) + 1;
 
             window.GameState.career.currentSong = chosen;
             window.GameState.career.chartRank = rank;
-            document.getElementById("navSongTitle").innerText = `"${chosen}"`;
-            document.getElementById("navChartRank").innerText = `#${rank} on Hot 100`;
+            window.GameState.player.funds += 25000;
+            updateRpgHeader();
 
-            alert(`🎉 RELEASE SUCCESS!\n"${chosen}" debuted at #${rank} on the Billboard Hot 100!\nStreaming numbers are breaking records across the globe!`);
+            alert(`🎉 HIT RECORD RELEASED!\n"${chosen}" debuted at #${rank} on the Billboard Hot 100!\nRoyalties earned: +$25,000!`);
         }
 
         function switchTab(t) {
             window.GameState.currentTab = t;
             document.getElementById("tabStory").classList.toggle("hidden", t !== "story");
+            document.getElementById("tabActions").classList.toggle("hidden", t !== "actions");
             document.getElementById("tabStudio").classList.toggle("hidden", t !== "studio");
             document.getElementById("tabRoster").classList.toggle("hidden", t !== "roster");
 
-            document.getElementById("btnTabStory").className = t === "story" ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-pink-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
-            document.getElementById("btnTabStudio").className = t === "studio" ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-pink-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
-            document.getElementById("btnTabRoster").className = t === "roster" ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-pink-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
+            document.getElementById("btnTabStory").className = t === "story" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md" : "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
+            document.getElementById("btnTabActions").className = t === "actions" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md" : "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
+            document.getElementById("btnTabStudio").className = t === "studio" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md" : "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
+            document.getElementById("btnTabRoster").className = t === "roster" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md" : "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white";
 
             if (t === "roster") renderRoster();
-            synth.playChime(400, 0.05);
+            if (t === "story") renderChatView();
+            sound.playChime(400, 0.05);
         }
 
         function toggleAudio() {
             window.GameState.audioEnabled = !window.GameState.audioEnabled;
-            synth.init();
+            sound.init();
+            if (window.GameState.audioEnabled) sound.startPad();
+            else sound.stopPad();
             document.getElementById("audioLabel").innerText = window.GameState.audioEnabled ? "🔊 Audio ON" : "🔇 Audio OFF";
         }
 
+        function openSaveModal() { document.getElementById("modalSave").classList.remove("hidden"); }
+        function closeSaveModal() { document.getElementById("modalSave").classList.add("hidden"); }
+
+        function saveGameSlot(s) {
+            localStorage.setItem("spotlight_aichat_save_" + s, JSON.stringify(window.GameState));
+            document.getElementById("slot1Time").innerText = "Saved Just Now";
+            alert("Game state saved to slot " + s + "!");
+        }
+
+        function loadGameSlot(s) {
+            const data = localStorage.getItem("spotlight_aichat_save_" + s);
+            if (data) {
+                window.GameState = JSON.parse(data);
+                renderChatView();
+                renderRoster();
+                updateRpgHeader();
+                closeSaveModal();
+                alert("Loaded save slot " + s + "!");
+            } else {
+                alert("No save found in slot " + s);
+            }
+        }
+
+        // Global Bindings
         window.switchTab = switchTab;
-        window.advanceStory = advanceStory;
-        window.prevDialogue = prevDialogue;
+        window.switchChatTarget = switchChatTarget;
+        window.sendFreeformMessage = sendFreeformMessage;
         window.selectGenre = selectGenre;
         window.selectCollab = selectCollab;
         window.produceAndReleaseSong = produceAndReleaseSong;
         window.toggleAudio = toggleAudio;
+        window.openSaveModal = openSaveModal;
+        window.closeSaveModal = closeSaveModal;
+        window.openApiModal = openApiModal;
+        window.closeApiModal = closeApiModal;
+        window.saveApiKey = saveApiKey;
+        window.saveGameSlot = saveGameSlot;
+        window.loadGameSlot = loadGameSlot;
         window.modAffinity = modAffinity;
         window.modAffinityAll = modAffinityAll;
-        window.triggerEnding = triggerEnding;
-        window.restartGame = restartGame;
+        window.advanceIntimacy = advanceIntimacy;
+        window.performActivity = performActivity;
+        window.buyAndGiveGift = buyAndGiveGift;
+        window.openDatePickerModal = openDatePickerModal;
+        window.closeDateModal = closeDateModal;
+        window.renderChatView = renderChatView;
+        window.renderRoster = renderRoster;
+        window.updateRpgHeader = updateRpgHeader;
 
         window.addEventListener("DOMContentLoaded", () => {
-            renderStoryStep();
+            renderChatView();
             renderRoster();
+            updateRpgHeader();
         });
     </script>
 </body>
