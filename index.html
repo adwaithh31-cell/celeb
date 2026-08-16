@@ -65,15 +65,22 @@
             <button onclick="window.toggleAudio()" id="btnAudio" class="px-3 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-amber-300">
                 <span id="audioLabel">🔇 Audio OFF</span>
             </button>
-            <button onclick="window.openApiModal()" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-[#00ffcc]">⚙️ AI Key</button>
-            <button onclick="window.openSaveModal()" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-white">💾</button>
+            <button onclick="window.openImageModal()" title="Customize Character Images" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-pink-400">
+                📸 Custom Art
+            </button>
+            <button onclick="window.openApiModal()" title="LLM API Key Settings" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-[#00ffcc]">
+                ⚙️ AI Key
+            </button>
+            <button onclick="window.openSaveModal()" class="px-2.5 py-1.5 rounded-xl bg-[#07080c] border border-[#202434] text-xs font-mono text-slate-300 hover:text-white">
+                💾
+            </button>
         </div>
     </header>
 
     <!-- MAIN VIEWS -->
     <main class="flex-1 flex overflow-hidden relative">
 
-        <!-- TAB 1: LIVE FREEFORM CONVERSATION -->
+        <!-- TAB 1: LIVE FREEFORM CONVERSATION & STAGE -->
         <div id="tabStory" class="flex-1 flex flex-col h-full w-full relative">
             <div id="storyStage" class="flex-1 w-full relative overflow-hidden bg-cover bg-center transition-all duration-700 flex items-end justify-center" style="background-image: linear-gradient(to top, rgba(7,8,12,0.95), rgba(7,8,12,0.2)), url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80');">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#07080c] via-transparent to-transparent pointer-events-none"></div>
@@ -266,21 +273,24 @@
         </div>
     </div>
 
-    <!-- API KEY MODAL (FOR LIVE LLM CHAT) -->
-    <div id="modalApi" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="glass-panel border border-[#202434] rounded-3xl max-w-md w-full p-6 shadow-2xl">
+    <!-- IMAGE CUSTOMIZER MODAL -->
+    <div id="modalImage" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-[#202434] rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-base font-serif font-bold text-white flex items-center space-x-2">
-                    <span>⚙️ Live LLM API Key (Optional)</span>
+                    <span>📸 Character Portraits & Celebrity Images</span>
                 </h3>
-                <button onclick="window.closeApiModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+                <button onclick="window.closeImageModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <p class="text-xs text-slate-300 mb-3">
-                You can talk to the heroines using the built-in intelligent dialogue AI right now with zero setup. If you want infinite LLM streaming, you can optionally paste a Gemini or OpenAI key below:
+            <p class="text-xs text-slate-300 mb-4">
+                Upload local photos from your device or paste direct image URLs for each celebrity. Custom images are automatically saved to your browser!
             </p>
-            <input type="password" id="userApiKeyInput" placeholder="Enter Gemini or OpenAI API Key..." class="w-full bg-[#07080c] border border-[#202434] focus:border-rose-500 rounded-xl px-3 py-2 text-xs text-white outline-none mb-3">
-            <div class="flex justify-end space-x-2">
-                <button onclick="window.saveApiKey()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Save Key</button>
+
+            <div class="space-y-4" id="customImageInputsList"></div>
+
+            <div class="flex justify-end space-x-2 mt-5 pt-3 border-t border-[#202434]">
+                <button onclick="window.resetDefaultImages()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800">Reset Defaults</button>
+                <button onclick="window.closeImageModal()" class="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold shadow-lg">Save & Done</button>
             </div>
         </div>
     </div>
@@ -304,6 +314,25 @@
             </div>
             <div class="flex justify-end">
                 <button onclick="window.closeSaveModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API KEY MODAL (FOR LIVE LLM CHAT) -->
+    <div id="modalApi" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-[#202434] rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-serif font-bold text-white flex items-center space-x-2">
+                    <span>⚙️ Live LLM API Key (Optional)</span>
+                </h3>
+                <button onclick="window.closeApiModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-xs text-slate-300 mb-3">
+                You can talk to the heroines using the built-in intelligent dialogue AI right now with zero setup. If you want infinite LLM streaming, you can optionally paste a Gemini or OpenAI key below:
+            </p>
+            <input type="password" id="userApiKeyInput" placeholder="Enter Gemini or OpenAI API Key..." class="w-full bg-[#07080c] border border-[#202434] focus:border-rose-500 rounded-xl px-3 py-2 text-xs text-white outline-none mb-3">
+            <div class="flex justify-end space-x-2">
+                <button onclick="window.saveApiKey()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Save Key</button>
             </div>
         </div>
     </div>
@@ -640,14 +669,100 @@
             }, 650);
         }
 
+        function openImageModal() {
+            renderImageModalInputs();
+            document.getElementById("modalImage").classList.remove("hidden");
+        }
+        function closeImageModal() {
+            document.getElementById("modalImage").classList.add("hidden");
+            renderChatView();
+            renderRoster();
+        }
+
+        function renderImageModalInputs() {
+            const list = document.getElementById("customImageInputsList");
+            if (!list) return;
+            list.innerHTML = "";
+
+            Object.keys(window.Heroines).forEach(key => {
+                const h = window.Heroines[key];
+                const item = document.createElement("div");
+                item.className = "p-3.5 rounded-2xl bg-[#07080c] border border-[#202434] flex flex-col md:flex-row items-center justify-between gap-3";
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <div class="w-14 h-14 rounded-2xl overflow-hidden border border-rose-500/40 shrink-0">
+                            <img src="${h.portrait}" alt="${h.name}" id="preview_${key}" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="font-bold text-xs text-white">${h.avatar} ${h.name}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${h.role}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full md:w-auto">
+                        <input type="text" value="${h.portrait.startsWith('data:') ? '[Uploaded Image]' : h.portrait}" placeholder="Paste Image URL..." onchange="window.updateImageUrl('${key}', this.value)" class="flex-1 md:w-64 bg-[#10121a] border border-[#202434] focus:border-rose-500 rounded-xl px-3 py-1.5 text-xs text-white outline-none">
+                        <label class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold cursor-pointer shrink-0 border border-slate-600">
+                            Upload 📁
+                            <input type="file" accept="image/*" onchange="window.uploadImageFile('${key}', event)" class="hidden">
+                        </label>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function updateImageUrl(key, url) {
+            if (!url || url === '[Uploaded Image]') return;
+            window.Heroines[key].portrait = url;
+            localStorage.setItem("spotlight_custom_img_" + key, url);
+            const prev = document.getElementById("preview_" + key);
+            if (prev) prev.src = url;
+        }
+
+        function uploadImageFile(key, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                window.Heroines[key].portrait = dataUrl;
+                try {
+                    localStorage.setItem("spotlight_custom_img_" + key, dataUrl);
+                } catch(err) {
+                    console.log("Image too large for LocalStorage, kept in session memory.");
+                }
+                const prev = document.getElementById("preview_" + key);
+                if (prev) prev.src = dataUrl;
+                renderChatView();
+                renderRoster();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadSavedCustomImages() {
+            Object.keys(window.Heroines).forEach(key => {
+                const saved = localStorage.getItem("spotlight_custom_img_" + key);
+                if (saved) {
+                    window.Heroines[key].portrait = saved;
+                }
+            });
+        }
+
+        function resetDefaultImages() {
+            Object.keys(window.Heroines).forEach(key => {
+                localStorage.removeItem("spotlight_custom_img_" + key);
+            });
+            alert("Images reset to defaults!");
+            location.reload();
+        }
+
+        function openApiModal() { document.getElementById("modalApi").classList.remove("hidden"); }
+        function closeApiModal() { document.getElementById("modalApi").classList.add("hidden"); }
+
         function saveApiKey() {
             window.GameState.apiKey = document.getElementById("userApiKeyInput").value.trim();
             closeApiModal();
             alert("API Key saved! Live AI generative streaming mode ready.");
         }
-
-        function openApiModal() { document.getElementById("modalApi").classList.remove("hidden"); }
-        function closeApiModal() { document.getElementById("modalApi").classList.add("hidden"); }
 
         function modAffinity(heroine, val) {
             if (window.GameState.affinities[heroine] !== undefined) {
@@ -888,6 +1003,11 @@
         window.toggleAudio = toggleAudio;
         window.openSaveModal = openSaveModal;
         window.closeSaveModal = closeSaveModal;
+        window.openImageModal = openImageModal;
+        window.closeImageModal = closeImageModal;
+        window.updateImageUrl = updateImageUrl;
+        window.uploadImageFile = uploadImageFile;
+        window.resetDefaultImages = resetDefaultImages;
         window.openApiModal = openApiModal;
         window.closeApiModal = closeApiModal;
         window.saveApiKey = saveApiKey;
@@ -905,6 +1025,7 @@
         window.updateRpgHeader = updateRpgHeader;
 
         window.addEventListener("DOMContentLoaded", () => {
+            loadSavedCustomImages();
             renderChatView();
             renderRoster();
             updateRpgHeader();
