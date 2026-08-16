@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Studio - AI Virtual World Creator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            950: '#2e1065',
+                        },
+                        cyber: {
+                            neon: '#00ffcc',
+                            purple: '#bc13fe',
+                            pink: '#ff2a85',
+                            dark: '#0a0b10',
+                            card: '#12141f',
+                            border: '#23273a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+        .glass-panel {
+            background: rgba(18, 20, 31, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+        #worldCanvas { touch-action: none; }
+    </style>
+</head>
+<body class="bg-cyber-dark text-slate-100 font-sans h-screen flex flex-col overflow-hidden selection:bg-brand-500 selection:text-white">
+
+    <!-- TOP NAVIGATION -->
+    <header class="h-14 border-b border-cyber-border bg-cyber-card/90 px-4 flex items-center justify-between shrink-0 z-30">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-cyber-neon flex items-center justify-center shadow-lg">
+                <i data-lucide="sparkles" class="w-5 h-5 text-black font-bold"></i>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="font-extrabold tracking-wider bg-gradient-to-r from-white via-slate-200 to-cyber-neon bg-clip-text text-transparent text-lg">ADVENTURE STUDIO</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-brand-900/60 border border-brand-500/40 text-brand-300 font-mono">NO-CODE</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <div class="hidden md:flex items-center space-x-2 bg-cyber-dark/80 px-3 py-1.5 rounded-lg border border-cyber-border mr-2">
+                <span class="text-xs text-slate-400 font-mono">WORLD:</span>
+                <span id="headerWorldTitle" class="text-xs font-semibold text-cyber-neon truncate max-w-[180px]">Neon Nexus: Sector 7</span>
+            </div>
+
+            <div class="bg-cyber-dark p-1 rounded-xl border border-cyber-border flex items-center space-x-1">
+                <button id="btnModePlay" onclick="switchStudioMode('play')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-600 text-white">
+                    <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                    <span>Play</span>
+                </button>
+                <button id="btnModeBuild" onclick="switchStudioMode('build')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
+                    <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+                    <span>Studio</span>
+                </button>
+                <button id="btnModeGraph" onclick="switchStudioMode('graph')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
+                    <i data-lucide="network" class="w-3.5 h-3.5"></i>
+                    <span>Map</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="openPromptModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-brand-600 to-cyber-purple hover:opacity-90 text-white shadow-lg transition-all">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">AI Generate</span>
+            </button>
+            <button onclick="toggleAudio()" id="btnAudio" title="Toggle Ambient Audio" class="p-2 rounded-lg bg-cyber-dark border border-cyber-border text-slate-400 hover:text-cyber-neon transition-all">
+                <i data-lucide="volume-x" id="audioIcon" class="w-4 h-4"></i>
+            </button>
+            <button onclick="openTemplatesModal()" title="Templates" class="p-2 rounded-lg bg-cyber-dark border border-cyber-border text-slate-400 hover:text-white transition-all">
+                <i data-lucide="folder-open" class="w-4 h-4"></i>
+            </button>
+            <button onclick="exportWorldJSON()" title="Export JSON" class="p-2 rounded-lg bg-cyber-dark border border-cyber-border text-slate-400 hover:text-white transition-all">
+                <i data-lucide="download" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- PLAY MODE -->
+        <div id="playView" class="flex-1 flex flex-col md:flex-row h-full w-full">
+            <div class="flex-1 flex flex-col h-full relative bg-cyber-dark border-r border-cyber-border overflow-hidden">
+                <div class="absolute top-3 left-3 z-20 flex items-center space-x-2">
+                    <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center space-x-2 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="currentRoomTag" class="font-mono font-bold text-cyber-neon">SECTOR 7</span>
+                    </div>
+                </div>
+
+                <div class="absolute top-3 right-3 z-20 flex items-center space-x-2">
+                    <div class="glass-panel p-1 rounded-xl flex items-center space-x-1">
+                        <button onclick="setPlayViewportMode('canvas')" id="btnViewCanvas" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-600 text-white">2.5D View</button>
+                        <button onclick="setPlayViewportMode('cinematic')" id="btnViewCinematic" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Cinematic</button>
+                    </div>
+                </div>
+
+                <div id="canvasContainer" class="flex-1 w-full h-full relative flex items-center justify-center overflow-hidden">
+                    <canvas id="worldCanvas" class="w-full h-full block"></canvas>
+                    <div class="scanline absolute inset-0"></div>
+                </div>
+
+                <div id="cinematicContainer" class="hidden flex-1 w-full h-full relative overflow-hidden flex flex-col justify-end p-6 bg-cover bg-center" style="background-image: linear-gradient(to top, rgba(10,11,16,0.95), rgba(10,11,16,0.4)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80');">
+                    <div class="relative z-10 max-w-2xl bg-cyber-card/90 border border-cyber-border p-5 rounded-2xl shadow-2xl">
+                        <div class="text-xs font-mono text-brand-400 mb-1" id="cinematicLocationName">ZONE</div>
+                        <h2 id="cinematicTitle" class="text-xl font-bold text-white mb-2">Chamber</h2>
+                        <p id="cinematicDescription" class="text-sm text-slate-300 leading-relaxed mb-4"></p>
+                        <div class="flex flex-wrap gap-2" id="cinematicActions"></div>
+                    </div>
+                </div>
+
+                <!-- Bottom Inventory & Objective Status -->
+                <div class="h-16 border-t border-cyber-border bg-cyber-card/95 px-4 flex items-center justify-between shrink-0 z-20">
+                    <div class="flex items-center space-x-2 overflow-x-auto py-1">
+                        <span class="text-xs font-mono text-slate-400 mr-2 flex items-center space-x-1">
+                            <i data-lucide="backpack" class="w-3.5 h-3.5 text-brand-400"></i>
+                            <span>INVENTORY:</span>
+                        </span>
+                        <div id="inventoryContainer" class="flex items-center space-x-2"></div>
+                    </div>
+                    <div class="flex items-center space-x-3 shrink-0">
+                        <div class="text-xs text-right">
+                            <div class="text-slate-400 text-[10px] font-mono">OBJECTIVES</div>
+                            <div id="questStatusText" class="font-bold text-cyber-neon">0 / 3 Clues</div>
+                        </div>
+                        <div class="w-16 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="questProgressBar" class="h-full bg-gradient-to-r from-brand-500 to-cyber-neon w-0 transition-all"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Narrative Feed & Choice Actions -->
+            <div class="w-full md:w-96 flex flex-col h-full bg-cyber-card border-l border-cyber-border shrink-0">
+                <div class="p-3.5 border-b border-cyber-border flex items-center justify-between bg-cyber-dark/40">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkle" class="w-4 h-4 text-cyber-neon"></i>
+                        <span class="text-xs font-bold uppercase text-slate-200">Interactive Lore & Dialogue</span>
+                    </div>
+                </div>
+                <div id="storyFeed" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm"></div>
+                <div class="p-3 border-t border-cyber-border bg-cyber-dark/70">
+                    <div class="text-[11px] font-mono text-slate-400 uppercase mb-2">Available Actions</div>
+                    <div id="roomActionsGrid" class="grid grid-cols-2 gap-2"></div>
+                </div>
+                <div class="p-3 border-t border-cyber-border bg-cyber-card flex items-center space-x-2">
+                    <input type="text" id="playerChatInput" placeholder="Say something to room or NPC..." onkeydown="if(event.key==='Enter') sendPlayerSpeech()" class="flex-1 bg-cyber-dark border border-cyber-border focus:border-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                    <button onclick="sendPlayerSpeech()" class="p-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDIO BUILDER -->
+        <div id="buildView" class="hidden flex-1 flex h-full w-full overflow-hidden">
+            <div class="w-72 border-r border-cyber-border bg-cyber-card flex flex-col h-full shrink-0">
+                <div class="p-3 border-b border-cyber-border flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-slate-200">World Zones</span>
+                    <button onclick="addNewRoom()" class="p-1.5 rounded-lg bg-brand-600 text-white text-xs flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>New Room</span>
+                    </button>
+                </div>
+                <div id="editorRoomList" class="flex-1 overflow-y-auto p-2 space-y-1.5"></div>
+            </div>
+            <div class="flex-1 flex flex-col h-full bg-cyber-dark overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto w-full space-y-6">
+                    <div class="glass-panel p-5 rounded-2xl border border-cyber-border">
+                        <h3 class="text-lg font-bold text-white mb-4">Zone Properties</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Room Name</label>
+                                <input type="text" id="editRoomName" onchange="updateCurrentRoomField('name', this.value)" class="w-full bg-cyber-card border border-cyber-border rounded-xl px-3 py-2 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Theme</label>
+                                <select id="editRoomTheme" onchange="updateCurrentRoomField('theme', this.value)" class="w-full bg-cyber-card border border-cyber-border rounded-xl px-3 py-2 text-xs text-white">
+                                    <option value="cyberpunk">Cyberpunk</option>
+                                    <option value="scifi">Sci-Fi</option>
+                                    <option value="fantasy">Fantasy</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                                <textarea id="editRoomDesc" rows="3" onchange="updateCurrentRoomField('description', this.value)" class="w-full bg-cyber-card border border-cyber-border rounded-xl p-3 text-xs text-white"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOPOLOGY GRAPH -->
+        <div id="graphView" class="hidden flex-1 flex flex-col h-full w-full bg-cyber-dark relative overflow-hidden">
+            <div class="flex-1 w-full h-full flex items-center justify-center p-8">
+                <svg id="worldGraphSvg" class="w-full h-full max-w-4xl max-h-[600px] border border-cyber-border rounded-3xl bg-cyber-card/50 shadow-2xl"></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI PROMPT MODAL -->
+    <div id="modalPrompt" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel border border-brand-500/30 rounded-3xl max-w-xl w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i data-lucide="wand-2" class="w-5 h-5 text-cyber-neon"></i>
+                    <span>AI World Creator Engine</span>
+                </h3>
+                <button onclick="closePromptModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-4">
+                <textarea id="aiPromptInput" rows="3" placeholder="Describe the world you want to build (e.g., A floating celestial observatory where ancient star-weavers trade prophecy scrolls)..." class="w-full bg-cyber-dark border border-cyber-border focus:border-cyber-neon rounded-2xl p-3 text-xs text-white outline-none"></textarea>
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="aiPromptGenre" class="w-full bg-cyber-dark border border-cyber-border rounded-xl px-3 py-2 text-xs text-white">
+                        <option value="cyberpunk">Cyberpunk Neon</option>
+                        <option value="fantasy">High Fantasy</option>
+                        <option value="scifi">Sci-Fi Odyssey</option>
+                    </select>
+                    <select id="aiPromptScale" class="w-full bg-cyber-dark border border-cyber-border rounded-xl px-3 py-2 text-xs text-white">
+                        <option value="3">3-Room Outpost</option>
+                        <option value="5" selected>5-Room Adventure</option>
+                    </select>
+                </div>
+                <button onclick="generateWorldFromAI()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-brand-600 to-cyber-neon text-white font-bold text-xs uppercase shadow-xl transition-all">
+                    Generate Virtual World
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENGINE CODE -->
+    <script>
+        const AppState = {
+            mode: 'play',
+            viewportMode: 'canvas',
+            audioEnabled: false,
+            audioVolume: 0.4,
+            currentRoomId: 'room_1',
+            player: { x: 300, y: 200, targetX: 300, targetY: 200, inventory: [], discoveredClues: 0 },
+            world: {
+                id: 'world_01',
+                title: 'Neon Nexus: Sector 7',
+                theme: 'cyberpunk',
+                rooms: {
+                    'room_1': {
+                        id: 'room_1',
+                        name: 'Sector 7: Neon Alleyway',
+                        description: 'Acid rain spatters against holographic ads for synthetic memories. A rogue netrunner monitors security feeds in the shadows.',
+                        theme: 'cyberpunk',
+                        weather: 'rain',
+                        exits: [{ to: 'room_2', label: 'Enter Synth Cafe', requiredItem: null }],
+                        npcs: [{ id: 'npc_1', name: 'Kaelen (Netrunner)', avatar: '👾', role: 'Informant', x: 180, y: 150, greeting: 'Keep your head down; corp drones are active.', dialogTree: { 'start': { text: 'Need a decryption key? Nova in the cafe might have left one.', options: [{ text: 'Thanks.', next: 'end' }] } } }],
+                        items: [{ id: 'i1', name: 'Hacked Terminal', x: 420, y: 130, description: 'Intercepted transmissions.', rewardItem: null }]
+                    },
+                    'room_2': {
+                        id: 'room_2',
+                        name: 'The Glitch: Synth Cafe',
+                        description: 'Warm purple neon lights and lo-fi synthwave fill this cozy sanctuary.',
+                        theme: 'cyberpunk',
+                        weather: 'fog',
+                        exits: [{ to: 'room_1', label: 'Back to Alley', requiredItem: null }],
+                        npcs: [{ id: 'npc_2', name: 'Nova (Android)', avatar: '🤖', role: 'Barista', x: 300, y: 120, greeting: 'Welcome to The Glitch!', dialogTree: { 'start': { text: 'Take the glowing cipher key by the counter.', options: [{ text: 'Will do.', next: 'end' }] } } }],
+                        items: [{ id: 'i2', name: 'Security Decryption Key', x: 120, y: 220, description: 'A glowing prism USB.', rewardItem: 'Security Decryption Key' }]
+                    }
+                }
+            }
+        };
+
+        class SynthAudio {
+            constructor() { this.ctx = null; this.osc = null; }
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+            playTone(freq, duration=0.1) {
+                if (!AppState.audioEnabled) return;
+                this.init();
+                const o = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                o.frequency.value = freq;
+                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                o.connect(g); g.connect(this.ctx.destination);
+                o.start(); o.stop(this.ctx.currentTime + duration);
+            }
+        }
+        const audio = new SynthAudio();
+
+        let canvas, ctx, particles = [];
+
+        function initCanvas() {
+            canvas = document.getElementById('worldCanvas');
+            ctx = canvas.getContext('2d');
+            resize();
+            window.addEventListener('resize', resize);
+            for (let i = 0; i < 50; i++) particles.push({ x: Math.random() * 800, y: Math.random() * 600, s: 1 + Math.random() * 2 });
+            canvas.addEventListener('click', (e) => {
+                const r = canvas.getBoundingClientRect();
+                AppState.player.targetX = e.clientX - r.left;
+                AppState.player.targetY = e.clientY - r.top;
+                audio.playTone(400, 0.05);
+            });
+            requestAnimationFrame(loop);
+        }
+
+        function resize() {
+            if (!canvas) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+
+        function loop() {
+            if (AppState.mode === 'play' && AppState.viewport
