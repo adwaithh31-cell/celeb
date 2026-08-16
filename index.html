@@ -4,7 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adventure Studio - AI Virtual World Creator</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                        },
+                        cyber: {
+                            neon: '#00ffcc',
+                            purple: '#bc13fe',
+                            pink: '#ff2a85',
+                            dark: '#0a0b10',
+                            card: '#12141f',
+                            border: '#23273a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
         * { box-sizing: border-box; user-select: none; }
@@ -33,47 +61,54 @@
             </div>
         </div>
 
+        <!-- Mode Switcher & Current World Title -->
         <div class="flex items-center space-x-2">
             <div class="hidden lg:flex items-center space-x-2 bg-[#0a0b10] px-3 py-1 rounded-lg border border-[#23273a] mr-2">
                 <span class="text-[10px] text-slate-400 font-mono">WORLD:</span>
                 <span id="headerWorldTitle" class="text-xs font-semibold text-[#00ffcc] truncate max-w-[160px]">Neon Nexus: Sector 7</span>
             </div>
 
+            <!-- View Modes -->
             <div class="bg-[#0a0b10] p-1 rounded-xl border border-[#23273a] flex items-center space-x-1">
-                <button id="btnModePlay" onclick="switchStudioMode('play')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-md">
+                <button id="btnModePlay" onclick="window.switchStudioMode('play')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-md">
                     <span>▶ Play</span>
                 </button>
-                <button id="btnModeBuild" onclick="switchStudioMode('build')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <button id="btnModeBuild" onclick="window.switchStudioMode('build')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
                     <span>🛠️ Studio</span>
                 </button>
-                <button id="btnModeGraph" onclick="switchStudioMode('graph')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <button id="btnModeGraph" onclick="window.switchStudioMode('graph')" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
                     <span>🗺️ Map</span>
                 </button>
             </div>
         </div>
 
+        <!-- Right Quick Actions -->
         <div class="flex items-center space-x-2">
-            <button onclick="openPromptModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-[#00ffcc] text-white shadow-lg transition-all active:scale-95">
+            <button onclick="window.openPromptModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-[#00ffcc] text-white shadow-lg transition-all active:scale-95">
                 <span>✨ AI Generate</span>
             </button>
-            <button onclick="toggleAudio()" id="btnAudio" title="Toggle Sound Synth" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-[#00ffcc] transition-all text-xs font-mono">
+            <button onclick="window.toggleAudio()" id="btnAudio" title="Toggle Sound Synth" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-[#00ffcc] transition-all text-xs font-mono">
                 <span id="audioLabel">🔇 Audio OFF</span>
             </button>
-            <button onclick="openTemplatesModal()" title="World Templates" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-white transition-all text-xs">
+            <button onclick="window.openTemplatesModal()" title="World Templates" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-white transition-all text-xs">
                 📁 Templates
             </button>
-            <button onclick="exportWorldJSON()" title="Export JSON" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-white transition-all text-xs font-mono">
+            <button onclick="window.exportWorldJSON()" title="Export JSON" class="px-2.5 py-1.5 rounded-lg bg-[#0a0b10] border border-[#23273a] text-slate-300 hover:text-white transition-all text-xs font-mono">
                 💾 Export
             </button>
         </div>
     </header>
 
-    <!-- MAIN VIEWPORT -->
+    <!-- MAIN WORKSPACE VIEWPORT -->
     <main class="flex-1 flex overflow-hidden relative">
 
-        <!-- PLAY VIEW -->
+        <!-- PLAY MODE -->
         <div id="playView" class="flex-1 flex flex-col lg:flex-row h-full w-full">
+            
+            <!-- Left: 2.5D Canvas / Cinematic Viewport -->
             <div class="flex-1 flex flex-col h-full relative bg-[#0a0b10] border-r border-[#23273a] overflow-hidden">
+                
+                <!-- Room Floating Header Badge -->
                 <div class="absolute top-3 left-3 z-20 flex items-center space-x-2 pointer-events-none">
                     <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center space-x-2 text-xs">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -84,17 +119,20 @@
                     </div>
                 </div>
 
+                <!-- View Switcher (2.5D vs Cinematic) -->
                 <div class="absolute top-3 right-3 z-20 flex items-center space-x-2">
                     <div class="glass-panel p-1 rounded-xl flex items-center space-x-1">
-                        <button onclick="setPlayViewportMode('canvas')" id="btnViewCanvas" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white">2.5D Grid View</button>
-                        <button onclick="setPlayViewportMode('cinematic')" id="btnViewCinematic" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white">Cinematic</button>
+                        <button onclick="window.setPlayViewportMode('canvas')" id="btnViewCanvas" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white">2.5D Grid View</button>
+                        <button onclick="window.setPlayViewportMode('cinematic')" id="btnViewCinematic" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white">Cinematic</button>
                     </div>
                 </div>
 
+                <!-- Canvas Viewport -->
                 <div id="canvasContainer" class="flex-1 w-full h-full relative flex items-center justify-center overflow-hidden bg-[#0d0e15]">
                     <canvas id="worldCanvas" class="w-full h-full block"></canvas>
                     <div class="scanline absolute inset-0"></div>
 
+                    <!-- Movement Instructions Hint -->
                     <div class="absolute bottom-3 left-3 z-20 glass-panel px-3 py-1.5 rounded-xl text-[11px] text-slate-400 flex items-center space-x-3 pointer-events-none">
                         <span>⌨️ <strong class="text-slate-200">WASD / Arrow Keys</strong> or <strong class="text-[#00ffcc]">Click Ground</strong> to Move</span>
                         <span class="text-slate-600">|</span>
@@ -102,15 +140,19 @@
                     </div>
                 </div>
 
+                <!-- Cinematic Viewport -->
                 <div id="cinematicContainer" class="hidden flex-1 w-full h-full relative overflow-hidden flex flex-col justify-end p-8 bg-cover bg-center" style="background-image: linear-gradient(to top, rgba(10,11,16,0.95), rgba(10,11,16,0.5)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80');">
                     <div class="relative z-10 max-w-2xl bg-[#12141f]/95 border border-[#23273a] p-6 rounded-2xl shadow-2xl backdrop-blur-md">
                         <div class="text-xs font-mono text-purple-400 mb-1" id="cinematicLocationName">ZONE LOCATION</div>
                         <h2 id="cinematicTitle" class="text-2xl font-bold text-white mb-2">Chamber Title</h2>
-                        <p id="cinematicDescription" class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4"></p>
+                        <p id="cinematicDescription" class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                            Atmospheric chamber narrative and lore.
+                        </p>
                         <div class="flex flex-wrap gap-2" id="cinematicActions"></div>
                     </div>
                 </div>
 
+                <!-- Bottom Backpack / Inventory Bar -->
                 <div class="h-14 border-t border-[#23273a] bg-[#12141f]/95 px-4 flex items-center justify-between shrink-0 z-20">
                     <div class="flex items-center space-x-2 overflow-x-auto py-1">
                         <span class="text-xs font-mono text-slate-400 mr-2 flex items-center space-x-1">
@@ -133,8 +175,9 @@
                 </div>
             </div>
 
-            <!-- Narrative Feed & Controls -->
+            <!-- Right: Interactive Lore & Actions Feed -->
             <div class="w-full lg:w-96 flex flex-col h-full bg-[#12141f] border-l border-[#23273a] shrink-0">
+                
                 <div class="p-3.5 border-b border-[#23273a] flex items-center justify-between bg-[#0a0b10]/40">
                     <div class="flex items-center space-x-2">
                         <span class="text-[#00ffcc] font-bold">✨</span>
@@ -143,8 +186,10 @@
                     <span class="text-[10px] px-2 py-0.5 rounded bg-purple-950 border border-purple-500/40 text-purple-300 font-mono">ACTIVE</span>
                 </div>
 
+                <!-- Story Feed -->
                 <div id="storyFeed" class="flex-1 p-4 overflow-y-auto space-y-3 font-sans text-xs"></div>
 
+                <!-- Action Choice Buttons -->
                 <div class="p-3 border-t border-[#23273a] bg-[#0a0b10]/80">
                     <div class="text-[11px] font-mono text-slate-400 uppercase mb-2 flex justify-between">
                         <span>AVAILABLE ACTIONS</span>
@@ -153,21 +198,23 @@
                     <div id="roomActionsGrid" class="grid grid-cols-2 gap-2"></div>
                 </div>
 
+                <!-- Freeform Chat Input Box -->
                 <div class="p-3 border-t border-[#23273a] bg-[#12141f] flex items-center space-x-2">
-                    <input type="text" id="playerChatInput" placeholder="Say something to room or NPC..." onkeydown="if(event.key==='Enter') sendPlayerSpeech()" class="flex-1 bg-[#0a0b10] border border-[#23273a] focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
-                    <button onclick="sendPlayerSpeech()" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all">
+                    <input type="text" id="playerChatInput" placeholder="Say something to room or NPC..." onkeydown="if(event.key==='Enter') window.sendPlayerSpeech()" class="flex-1 bg-[#0a0b10] border border-[#23273a] focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
+                    <button onclick="window.sendPlayerSpeech()" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all">
                         Send
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- STUDIO BUILDER -->
+        <!-- STUDIO BUILDER MODE -->
         <div id="buildView" class="hidden flex-1 flex h-full w-full overflow-hidden">
+            
             <div class="w-72 border-r border-[#23273a] bg-[#12141f] flex flex-col h-full shrink-0">
                 <div class="p-3 border-b border-[#23273a] flex items-center justify-between">
                     <span class="text-xs font-bold uppercase text-slate-200">World Zones</span>
-                    <button onclick="addNewRoom()" class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center space-x-1">
+                    <button onclick="window.addNewRoom()" class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center space-x-1">
                         <span>+ New Room</span>
                     </button>
                 </div>
@@ -185,7 +232,7 @@
                             <h3 class="text-base font-bold text-white flex items-center space-x-2">
                                 <span>📦 Zone Properties</span>
                             </h3>
-                            <button onclick="deleteCurrentRoom()" class="px-3 py-1 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-semibold">
+                            <button onclick="window.deleteCurrentRoom()" class="px-3 py-1 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-semibold">
                                 Delete Room
                             </button>
                         </div>
@@ -197,15 +244,15 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">Room Display Name</label>
-                                <input type="text" id="editRoomName" onchange="updateCurrentRoomField('name', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
+                                <input type="text" id="editRoomName" onchange="window.updateCurrentRoomField('name', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">Atmospheric Story Narrative</label>
-                                <textarea id="editRoomDesc" rows="3" onchange="updateCurrentRoomField('description', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl p-3 text-xs text-white"></textarea>
+                                <textarea id="editRoomDesc" rows="3" onchange="window.updateCurrentRoomField('description', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl p-3 text-xs text-white"></textarea>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">Theme / Biome</label>
-                                <select id="editRoomTheme" onchange="updateCurrentRoomField('theme', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
+                                <select id="editRoomTheme" onchange="window.updateCurrentRoomField('theme', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
                                     <option value="cyberpunk">Cyberpunk Neon</option>
                                     <option value="scifi">Sci-Fi Orbital</option>
                                     <option value="fantasy">Ancient Fantasy</option>
@@ -213,7 +260,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">Weather Particles</label>
-                                <select id="editRoomWeather" onchange="updateCurrentRoomField('weather', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
+                                <select id="editRoomWeather" onchange="window.updateCurrentRoomField('weather', this.value)" class="w-full bg-[#12141f] border border-[#23273a] rounded-xl px-3 py-2 text-xs text-white">
                                     <option value="rain">Cyber Rain</option>
                                     <option value="embers">Floating Embers</option>
                                     <option value="dust">Cosmic Dust</option>
@@ -226,7 +273,7 @@
                     <div class="glass-panel p-5 rounded-2xl border border-[#23273a]">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-sm font-bold text-white">🚪 Connected Exits & Portals</h4>
-                            <button onclick="addExitToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Link Portal</button>
+                            <button onclick="window.addExitToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Link Portal</button>
                         </div>
                         <div id="editorExitsList" class="space-y-2"></div>
                     </div>
@@ -234,7 +281,7 @@
                     <div class="glass-panel p-5 rounded-2xl border border-[#23273a]">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-sm font-bold text-white">👤 Characters & NPCs</h4>
-                            <button onclick="addNpcToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Add NPC</button>
+                            <button onclick="window.addNpcToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Add NPC</button>
                         </div>
                         <div id="editorNpcsList" class="space-y-2"></div>
                     </div>
@@ -242,7 +289,7 @@
                     <div class="glass-panel p-5 rounded-2xl border border-[#23273a]">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-sm font-bold text-white">✨ Collectible Props & Clues</h4>
-                            <button onclick="addItemToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Add Item</button>
+                            <button onclick="window.addItemToCurrentRoom()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">+ Add Item</button>
                         </div>
                         <div id="editorItemsList" class="space-y-2"></div>
                     </div>
@@ -269,7 +316,7 @@
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
                     <span>✨ AI World Creator</span>
                 </h3>
-                <button onclick="closePromptModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+                <button onclick="window.closePromptModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <div class="space-y-4">
                 <div>
@@ -293,7 +340,7 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="generateWorldFromAI()" id="btnGenerateAI" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-[#00ffcc] text-white font-bold text-xs uppercase shadow-xl transition-all active:scale-95">
+                <button onclick="window.generateWorldFromAI()" id="btnGenerateAI" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-[#00ffcc] text-white font-bold text-xs uppercase shadow-xl transition-all active:scale-95">
                     Generate Virtual World
                 </button>
             </div>
@@ -304,34 +351,34 @@
         <div class="glass-panel border border-[#23273a] rounded-3xl max-w-xl w-full p-6 shadow-2xl">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-bold text-white">📁 Pre-Built World Templates</h3>
-                <button onclick="closeTemplatesModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+                <button onclick="window.closeTemplatesModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                <div onclick="loadTemplateWorld('cyberpunk')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-[#00ffcc] cursor-pointer">
+                <div onclick="window.loadTemplateWorld('cyberpunk')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-[#00ffcc] cursor-pointer">
                     <div class="text-xl mb-1">🏙️</div>
                     <h4 class="text-xs font-bold text-white">Neon Nexus 2099</h4>
                     <p class="text-[10px] text-slate-400 mt-1">Hack terminals, trade ciphers, and find the fixer.</p>
                 </div>
-                <div onclick="loadTemplateWorld('fantasy')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-purple-400 cursor-pointer">
+                <div onclick="window.loadTemplateWorld('fantasy')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-purple-400 cursor-pointer">
                     <div class="text-xl mb-1">🔮</div>
                     <h4 class="text-xs font-bold text-white">The Whispering Spire</h4>
                     <p class="text-[10px] text-slate-400 mt-1">Ancient magical archives filled with spellbooks.</p>
                 </div>
-                <div onclick="loadTemplateWorld('scifi')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-yellow-400 cursor-pointer">
+                <div onclick="window.loadTemplateWorld('scifi')" class="p-3 rounded-2xl bg-[#0a0b10] border border-[#23273a] hover:border-yellow-400 cursor-pointer">
                     <div class="text-xl mb-1">🚀</div>
                     <h4 class="text-xs font-bold text-white">Chrono Station</h4>
                     <p class="text-[10px] text-slate-400 mt-1">Deep space research orbital station in loop.</p>
                 </div>
             </div>
             <div class="flex justify-end">
-                <button onclick="closeTemplatesModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 text-xs font-bold">Close</button>
+                <button onclick="window.closeTemplatesModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 text-xs font-bold">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- ENGINE JAVASCRIPT -->
+    <!-- JAVASCRIPT ENGINE -->
     <script>
-        const AppState = {
+        window.AppState = {
             mode: 'play',
             viewportMode: 'canvas',
             audioEnabled: false,
@@ -371,7 +418,7 @@
                                 greeting: 'Keep your voice down. Corp surveillance drones are scanning this sector.',
                                 dialogTree: {
                                     'start': {
-                                        text: 'Need to get into the Black Market? The blast door requires Nova\'s decryption key from the Synth Cafe.',
+                                        text: "Need to get into the Black Market? The blast door requires Nova's decryption key from the Synth Cafe.",
                                         options: [
                                             { text: 'Thanks for the intel.', next: 'end' }
                                         ]
@@ -481,7 +528,7 @@
                 if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
             }
             playTone(freq, dur=0.1) {
-                if (!AppState.audioEnabled) return;
+                if (!window.AppState.audioEnabled) return;
                 this.init();
                 if (!this.ctx) return;
                 try {
@@ -540,19 +587,19 @@
                     }
                 }
 
-                AppState.player.targetX = clickX;
-                AppState.player.targetY = clickY;
+                window.AppState.player.targetX = clickX;
+                window.AppState.player.targetY = clickY;
                 sfx.playTone(350, 0.04);
             });
 
             window.addEventListener('keydown', (e) => {
-                if (AppState.mode !== 'play') return;
+                if (window.AppState.mode !== 'play') return;
                 if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
                 const s = 25;
-                if (e.key === 'w' || e.key === 'ArrowUp') AppState.player.targetY = Math.max(60, AppState.player.y - s);
-                if (e.key === 's' || e.key === 'ArrowDown') AppState.player.targetY = Math.min((canvas.height || 500) - 60, AppState.player.y + s);
-                if (e.key === 'a' || e.key === 'ArrowLeft') AppState.player.targetX = Math.max(60, AppState.player.x - s);
-                if (e.key === 'd' || e.key === 'ArrowRight') AppState.player.targetX = Math.min((canvas.width || 700) - 60, AppState.player.x + s);
+                if (e.key === 'w' || e.key === 'ArrowUp') window.AppState.player.targetY = Math.max(60, window.AppState.player.y - s);
+                if (e.key === 's' || e.key === 'ArrowDown') window.AppState.player.targetY = Math.min((canvas.height || 500) - 60, window.AppState.player.y + s);
+                if (e.key === 'a' || e.key === 'ArrowLeft') window.AppState.player.targetX = Math.max(60, window.AppState.player.x - s);
+                if (e.key === 'd' || e.key === 'ArrowRight') window.AppState.player.targetX = Math.min((canvas.width || 700) - 60, window.AppState.player.x + s);
             });
 
             requestAnimationFrame(renderLoop);
@@ -565,14 +612,14 @@
         }
 
         function renderLoop() {
-            if (AppState.mode === 'play' && AppState.viewportMode === 'canvas') {
+            if (window.AppState.mode === 'play' && window.AppState.viewportMode === 'canvas') {
                 renderCanvas();
             }
             requestAnimationFrame(renderLoop);
         }
 
         function getCurrentRoom() {
-            return AppState.world.rooms[AppState.currentRoomId] || Object.values(AppState.world.rooms)[0];
+            return window.AppState.world.rooms[window.AppState.currentRoomId] || Object.values(window.AppState.world.rooms)[0];
         }
 
         function renderCanvas() {
@@ -582,7 +629,6 @@
             const room = getCurrentRoom();
             if (!room) return;
 
-            // Clear Background
             ctx.fillStyle = '#0a0b12';
             ctx.fillRect(0, 0, w, h);
 
@@ -668,8 +714,8 @@
                 ctx.restore();
             });
 
-            // Player Avatar
-            const p = AppState.player;
+            // Player
+            const p = window.AppState.player;
             p.x += (p.targetX - p.x) * 0.1;
             p.y += (p.targetY - p.y) * 0.1;
 
@@ -710,7 +756,7 @@
         }
 
         function loadRoom(id) {
-            AppState.currentRoomId = id;
+            window.AppState.currentRoomId = id;
             const r = getCurrentRoom();
             if (!r) return;
 
@@ -721,10 +767,10 @@
             if (bioEl) bioEl.innerText = (r.theme || 'CYBERPUNK').toUpperCase();
 
             const titleEl = document.getElementById('headerWorldTitle');
-            if (titleEl) titleEl.innerText = AppState.world.title;
+            if (titleEl) titleEl.innerText = window.AppState.world.title;
 
             const cLoc = document.getElementById('cinematicLocationName');
-            if (cLoc) cLoc.innerText = AppState.world.title.toUpperCase();
+            if (cLoc) cLoc.innerText = window.AppState.world.title.toUpperCase();
 
             const cTit = document.getElementById('cinematicTitle');
             if (cTit) cTit.innerText = r.name;
@@ -782,7 +828,7 @@
             });
 
             room.exits.forEach(ex => {
-                const isLocked = ex.requiredItem && !AppState.player.inventory.includes(ex.requiredItem);
+                const isLocked = ex.requiredItem && !window.AppState.player.inventory.includes(ex.requiredItem);
                 const btn = document.createElement('button');
                 btn.className = `p-2 rounded-xl bg-[#12141f] border ${isLocked ? 'border-red-500/40 text-red-300' : 'border-[#23273a] hover:border-emerald-400 text-emerald-400'} text-left text-xs font-semibold truncate`;
                 btn.innerHTML = `${isLocked ? '🔒' : '🚪'} ${ex.label}`;
@@ -864,9 +910,9 @@
             if (!item) return;
 
             sfx.playTone(850);
-            if (item.rewardItem && !AppState.player.inventory.includes(item.rewardItem)) {
-                AppState.player.inventory.push(item.rewardItem);
-                AppState.player.discoveredClues++;
+            if (item.rewardItem && !window.AppState.player.inventory.includes(item.rewardItem)) {
+                window.AppState.player.inventory.push(item.rewardItem);
+                window.AppState.player.discoveredClues++;
                 updateInventoryUI();
                 appendStoryCard({
                     title: `✨ Collected: ${item.rewardItem}`,
@@ -885,10 +931,10 @@
             const container = document.getElementById('inventoryContainer');
             if (!container) return;
             container.innerHTML = '';
-            if (AppState.player.inventory.length === 0) {
+            if (window.AppState.player.inventory.length === 0) {
                 container.innerHTML = `<span class="text-xs text-slate-500 italic">Backpack is empty.</span>`;
             } else {
-                AppState.player.inventory.forEach(it => {
+                window.AppState.player.inventory.forEach(it => {
                     const badge = document.createElement('span');
                     badge.className = 'px-2 py-0.5 rounded-lg bg-purple-950 border border-purple-500/40 text-purple-300 text-xs font-mono';
                     badge.innerText = `✓ ${it}`;
@@ -897,9 +943,9 @@
             }
 
             const st = document.getElementById('questStatusText');
-            if (st) st.innerText = `${Math.min(3, AppState.player.discoveredClues)} / 3 Clues`;
+            if (st) st.innerText = `${Math.min(3, window.AppState.player.discoveredClues)} / 3 Clues`;
             const bar = document.getElementById('questProgressBar');
-            if (bar) bar.style.width = `${(Math.min(3, AppState.player.discoveredClues) / 3) * 100}%`;
+            if (bar) bar.style.width = `${(Math.min(3, window.AppState.player.discoveredClues) / 3) * 100}%`;
         }
 
         function sendPlayerSpeech() {
@@ -929,10 +975,14 @@
         }
 
         function switchStudioMode(m) {
-            AppState.mode = m;
-            document.getElementById('playView').classList.toggle('hidden', m !== 'play');
-            document.getElementById('buildView').classList.toggle('hidden', m !== 'build');
-            document.getElementById('graphView').classList.toggle('hidden', m !== 'graph');
+            window.AppState.mode = m;
+            const playEl = document.getElementById('playView');
+            const buildEl = document.getElementById('buildView');
+            const graphEl = document.getElementById('graphView');
+
+            if (playEl) playEl.classList.toggle('hidden', m !== 'play');
+            if (buildEl) buildEl.classList.toggle('hidden', m !== 'build');
+            if (graphEl) graphEl.classList.toggle('hidden', m !== 'graph');
 
             if (m === 'play') resizeCanvas();
             if (m === 'build') { renderEditorRoomList(); populateRoomForm(); }
@@ -940,9 +990,11 @@
         }
 
         function setPlayViewportMode(vm) {
-            AppState.viewportMode = vm;
-            document.getElementById('canvasContainer').classList.toggle('hidden', vm !== 'canvas');
-            document.getElementById('cinematicContainer').classList.toggle('hidden', vm !== 'cinematic');
+            window.AppState.viewportMode = vm;
+            const cEl = document.getElementById('canvasContainer');
+            const ciEl = document.getElementById('cinematicContainer');
+            if (cEl) cEl.classList.toggle('hidden', vm !== 'canvas');
+            if (ciEl) ciEl.classList.toggle('hidden', vm !== 'cinematic');
             if (vm === 'canvas') resizeCanvas();
         }
 
@@ -950,12 +1002,12 @@
             const list = document.getElementById('editorRoomList');
             if (!list) return;
             list.innerHTML = '';
-            Object.values(AppState.world.rooms).forEach(r => {
+            Object.values(window.AppState.world.rooms).forEach(r => {
                 const item = document.createElement('div');
-                item.className = `p-2.5 rounded-xl cursor-pointer text-xs flex justify-between ${r.id === AppState.currentRoomId ? 'bg-purple-600 text-white font-bold' : 'bg-[#0a0b10] text-slate-300'}`;
+                item.className = `p-2.5 rounded-xl cursor-pointer text-xs flex justify-between ${r.id === window.AppState.currentRoomId ? 'bg-purple-600 text-white font-bold' : 'bg-[#0a0b10] text-slate-300'}`;
                 item.innerText = r.name;
                 item.onclick = () => {
-                    AppState.currentRoomId = r.id;
+                    window.AppState.currentRoomId = r.id;
                     renderEditorRoomList();
                     populateRoomForm();
                 };
@@ -966,29 +1018,35 @@
         function populateRoomForm() {
             const r = getCurrentRoom();
             if (!r) return;
-            document.getElementById('editRoomId').value = r.id;
-            document.getElementById('editRoomName').value = r.name;
-            document.getElementById('editRoomDesc').value = r.description;
-            document.getElementById('editRoomTheme').value = r.theme || 'cyberpunk';
-            document.getElementById('editRoomWeather').value = r.weather || 'none';
+            const idEl = document.getElementById('editRoomId'); if (idEl) idEl.value = r.id;
+            const nameEl = document.getElementById('editRoomName'); if (nameEl) nameEl.value = r.name;
+            const descEl = document.getElementById('editRoomDesc'); if (descEl) descEl.value = r.description;
+            const thEl = document.getElementById('editRoomTheme'); if (thEl) thEl.value = r.theme || 'cyberpunk';
+            const wEl = document.getElementById('editRoomWeather'); if (wEl) wEl.value = r.weather || 'none';
 
             const exList = document.getElementById('editorExitsList');
-            exList.innerHTML = '';
-            r.exits.forEach((ex, idx) => {
-                exList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>🚪 ${ex.label} (to: ${ex.to})</span><button onclick="getCurrentRoom().exits.splice(${idx},1); populateRoomForm();" class="text-red-400">✕</button></div>`;
-            });
+            if (exList) {
+                exList.innerHTML = '';
+                r.exits.forEach((ex, idx) => {
+                    exList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>🚪 ${ex.label} (to: ${ex.to})</span><button onclick="getCurrentRoom().exits.splice(${idx},1); populateRoomForm();" class="text-red-400 font-bold">✕</button></div>`;
+                });
+            }
 
             const npcList = document.getElementById('editorNpcsList');
-            npcList.innerHTML = '';
-            r.npcs.forEach((n, idx) => {
-                npcList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>${n.avatar} ${n.name} [${n.role}]</span><button onclick="getCurrentRoom().npcs.splice(${idx},1); populateRoomForm();" class="text-red-400">✕</button></div>`;
-            });
+            if (npcList) {
+                npcList.innerHTML = '';
+                r.npcs.forEach((n, idx) => {
+                    npcList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>${n.avatar} ${n.name} [${n.role}]</span><button onclick="getCurrentRoom().npcs.splice(${idx},1); populateRoomForm();" class="text-red-400 font-bold">✕</button></div>`;
+                });
+            }
 
             const itemList = document.getElementById('editorItemsList');
-            itemList.innerHTML = '';
-            r.items.forEach((it, idx) => {
-                itemList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>✨ ${it.name}</span><button onclick="getCurrentRoom().items.splice(${idx},1); populateRoomForm();" class="text-red-400">✕</button></div>`;
-            });
+            if (itemList) {
+                itemList.innerHTML = '';
+                r.items.forEach((it, idx) => {
+                    itemList.innerHTML += `<div class="p-2 bg-[#0a0b10] border border-[#23273a] rounded-xl flex justify-between text-xs"><span>✨ ${it.name}</span><button onclick="getCurrentRoom().items.splice(${idx},1); populateRoomForm();" class="text-red-400 font-bold">✕</button></div>`;
+                });
+            }
         }
 
         function updateCurrentRoomField(field, val) {
@@ -1000,35 +1058,35 @@
         }
 
         function addNewRoom() {
-            const newId = 'room_' + (Object.keys(AppState.world.rooms).length + 1);
-            AppState.world.rooms[newId] = {
+            const newId = 'room_' + (Object.keys(window.AppState.world.rooms).length + 1);
+            window.AppState.world.rooms[newId] = {
                 id: newId,
                 name: 'New Adventure Chamber',
                 description: 'A newly created zone ready to be customized.',
                 theme: 'cyberpunk',
                 weather: 'none',
-                exits: [{ to: AppState.currentRoomId, label: 'Return' }],
+                exits: [{ to: window.AppState.currentRoomId, label: 'Return' }],
                 npcs: [],
                 items: []
             };
-            AppState.currentRoomId = newId;
+            window.AppState.currentRoomId = newId;
             renderEditorRoomList();
             populateRoomForm();
         }
 
         function deleteCurrentRoom() {
-            if (Object.keys(AppState.world.rooms).length <= 1) return;
-            delete AppState.world.rooms[AppState.currentRoomId];
-            AppState.currentRoomId = Object.keys(AppState.world.rooms)[0];
+            if (Object.keys(window.AppState.world.rooms).length <= 1) return;
+            delete window.AppState.world.rooms[window.AppState.currentRoomId];
+            window.AppState.currentRoomId = Object.keys(window.AppState.world.rooms)[0];
             renderEditorRoomList();
             populateRoomForm();
         }
 
         function addExitToCurrentRoom() {
             const r = getCurrentRoom();
-            const other = Object.keys(AppState.world.rooms).find(id => id !== r.id);
+            const other = Object.keys(window.AppState.world.rooms).find(id => id !== r.id);
             if (!other) return;
-            r.exits.push({ to: other, label: `Door to ${AppState.world.rooms[other].name}` });
+            r.exits.push({ to: other, label: `Door to ${window.AppState.world.rooms[other].name}` });
             populateRoomForm();
         }
 
@@ -1048,7 +1106,7 @@
             const svg = document.getElementById('worldGraphSvg');
             if (!svg) return;
             svg.innerHTML = '';
-            const rooms = Object.values(AppState.world.rooms);
+            const rooms = Object.values(window.AppState.world.rooms);
             const total = rooms.length;
             const cx = 350, cy = 220, rad = 140;
 
@@ -1075,12 +1133,12 @@
             rooms.forEach(r => {
                 const c = coords[r.id];
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.onclick = () => { AppState.currentRoomId = r.id; switchStudioMode('play'); loadRoom(r.id); };
+                g.onclick = () => { window.AppState.currentRoomId = r.id; switchStudioMode('play'); loadRoom(r.id); };
                 g.setAttribute('class', 'cursor-pointer');
 
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('cx', c.x); circle.setAttribute('cy', c.y); circle.setAttribute('r', '22');
-                circle.setAttribute('fill', r.id === AppState.currentRoomId ? '#7c3aed' : '#1e1b4b');
+                circle.setAttribute('fill', r.id === window.AppState.currentRoomId ? '#7c3aed' : '#1e1b4b');
                 circle.setAttribute('stroke', '#00ffcc'); circle.setAttribute('stroke-width', '2');
                 g.appendChild(circle);
 
@@ -1093,19 +1151,101 @@
             });
         }
 
-        function openPromptModal() { document.getElementById('modalPrompt').classList.remove('hidden'); }
-        function closePromptModal() { document.getElementById('modalPrompt').classList.add('hidden'); }
-        function openTemplatesModal() { document.getElementById('modalTemplates').classList.remove('hidden'); }
-        function closeTemplatesModal() { document.getElementById('modalTemplates').classList.add('hidden'); }
+        function openPromptModal() { const el = document.getElementById('modalPrompt'); if (el) el.classList.remove('hidden'); }
+        function closePromptModal() { const el = document.getElementById('modalPrompt'); if (el) el.classList.add('hidden'); }
+        function openTemplatesModal() { const el = document.getElementById('modalTemplates'); if (el) el.classList.remove('hidden'); }
+        function closeTemplatesModal() { const el = document.getElementById('modalTemplates'); if (el) el.classList.add('hidden'); }
 
         function generateWorldFromAI() {
-            const prompt = document.getElementById('aiPromptInput').value || 'Cyberpunk rogue AI hideout';
-            const genre = document.getElementById('aiPromptGenre').value;
-            const scale = parseInt(document.getElementById('aiPromptScale').value) || 4;
+            const inp = document.getElementById('aiPromptInput');
+            const prompt = (inp && inp.value.trim()) || 'Cyberpunk rogue AI hideout';
+            const genreEl = document.getElementById('aiPromptGenre');
+            const genre = (genreEl && genreEl.value) || 'cyberpunk';
+            const scaleEl = document.getElementById('aiPromptScale');
+            const scale = (scaleEl && parseInt(scaleEl.value)) || 4;
 
             const btn = document.getElementById('btnGenerateAI');
-            btn.innerText = '⚡ Synthesizing World...';
+            if (btn) btn.innerText = '⚡ Synthesizing World...';
 
             setTimeout(() => {
                 const rooms = {};
-                for (let i = 1; i
+                for (let i = 1; i <= scale; i++) {
+                    const rId = 'room_' + i;
+                    rooms[rId] = {
+                        id: rId,
+                        name: `${genre.toUpperCase()} Sector #${i}`,
+                        description: `A generated zone based on "${prompt}". Mysterious energy pulses through the architecture.`,
+                        theme: genre,
+                        weather: i === 1 ? 'rain' : 'dust',
+                        exits: [],
+                        npcs: [{ id: 'npc_' + i, name: `Agent ${i}`, avatar: genre === 'fantasy' ? '🧙' : '🤖', role: 'Sentinel', x: 200 + i * 30, y: 150, greeting: 'Welcome to this zone.' }],
+                        items: [{ id: 'it_' + i, name: `Artifact #${i}`, x: 380, y: 200, description: 'A lost artifact.', rewardItem: `Artifact #${i}` }]
+                    };
+                }
+                const keys = Object.keys(rooms);
+                keys.forEach((k, idx) => {
+                    if (idx < keys.length - 1) rooms[k].exits.push({ to: keys[idx+1], label: `Proceed to ${rooms[keys[idx+1]].name}` });
+                    if (idx > 0) rooms[k].exits.push({ to: keys[idx-1], label: `Back to ${rooms[keys[idx-1]].name}` });
+                });
+
+                window.AppState.world = { id: 'ai_' + Date.now(), title: prompt.slice(0, 24), theme: genre, rooms: rooms };
+                window.AppState.currentRoomId = keys[0];
+                window.AppState.player.inventory = [];
+                window.AppState.player.discoveredClues = 0;
+
+                if (btn) btn.innerText = 'Generate Virtual World';
+                closePromptModal();
+                switchStudioMode('play');
+                loadRoom(keys[0]);
+            }, 500);
+        }
+
+        function loadTemplateWorld(type) {
+            closeTemplatesModal();
+            generateWorldFromAI();
+        }
+
+        function toggleAudio() {
+            window.AppState.audioEnabled = !window.AppState.audioEnabled;
+            sfx.init();
+            const lbl = document.getElementById('audioLabel');
+            if (lbl) lbl.innerText = window.AppState.audioEnabled ? '🔊 Audio ON' : '🔇 Audio OFF';
+        }
+
+        function exportWorldJSON() {
+            const blob = new Blob([JSON.stringify(window.AppState.world, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'virtual_world.json';
+            a.click();
+        }
+
+        // Attach all functions to window for global access
+        window.switchStudioMode = switchStudioMode;
+        window.setPlayViewportMode = setPlayViewportMode;
+        window.openPromptModal = openPromptModal;
+        window.closePromptModal = closePromptModal;
+        window.generateWorldFromAI = generateWorldFromAI;
+        window.openTemplatesModal = openTemplatesModal;
+        window.closeTemplatesModal = closeTemplatesModal;
+        window.loadTemplateWorld = loadTemplateWorld;
+        window.toggleAudio = toggleAudio;
+        window.exportWorldJSON = exportWorldJSON;
+        window.sendPlayerSpeech = sendPlayerSpeech;
+        window.addNewRoom = addNewRoom;
+        window.deleteCurrentRoom = deleteCurrentRoom;
+        window.addExitToCurrentRoom = addExitToCurrentRoom;
+        window.addNpcToCurrentRoom = addNpcToCurrentRoom;
+        window.addItemToCurrentRoom = addItemToCurrentRoom;
+        window.updateCurrentRoomField = updateCurrentRoomField;
+        window.interactNpc = interactNpc;
+        window.interactItem = interactItem;
+        window.loadRoom = loadRoom;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            loadRoom(window.AppState.currentRoomId);
+        });
+    </script>
+</body>
+</html>
